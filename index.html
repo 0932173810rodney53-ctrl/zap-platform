@@ -760,7 +760,7 @@ async function clientDelivered(no){
 
 // 自動登入
 const saved=localStorage.getItem('zap_u');
-if(saved&&!cno){try{user=JSON.parse(saved);showApp();}catch(e){}}
+if(saved&&!cno&&!dno){try{user=JSON.parse(saved);showApp();}catch(e){}}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('kZ_eZRB-0i4utfReI');</script>
