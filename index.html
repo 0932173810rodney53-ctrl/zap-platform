@@ -405,7 +405,11 @@ function renderPending(pending){
       <tr id="pr-${o['詢價單號']}"><td colspan="6" style="padding:0">
         <div class="pform" id="pf-${o['詢價單號']}">
           <div id="pi-${o['詢價單號']}"></div>
-          <div style="display:flex;gap:8px;margin-top:12px">
+          <div style="margin-top:12px">
+            <div style="font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:6px">預計出貨日期 <span style="color:var(--orange)">*</span></div>
+            <input type="date" id="shipdate-${o['詢價單號']}" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--ink);width:100%;outline:none;margin-bottom:10px">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
             <button class="btn btn-green" onclick="sendPrice('${o['詢價單號']}','${o['Email']}','${o['公司名稱']}')">送出報價給客戶</button>
             <button class="btn btn-ghost" onclick="hidePForm('${o['詢價單號']}')">取消</button>
           </div>
@@ -437,11 +441,15 @@ async function sendPrice(no,email,company){
   });
   if(!ok){showToast('⚠ 請填寫所有品項的單價');return;}
 
+  const shipDateEl=document.getElementById('shipdate-'+no);
+  const shipDate=shipDateEl?shipDateEl.value:'';
+  if(!shipDate){showToast('⚠ 請填寫預計出貨日期');return;}
+
   // 更新 Google Sheets
   try{
     await fetch(API,{method:'POST',body:JSON.stringify({
       action:'updatePrice',token:user.token||'local',
-      詢價單號:no,報價內容:priceText
+      '詢價單號':no,'報價內容':priceText,'預計出貨日':shipDate
     })});
   }catch(e){}
 
@@ -453,7 +461,8 @@ async function sendPrice(no,email,company){
       company: company,
       order_no: no,
       price_content: priceText,
-      confirm_url: `https://0932173810rodney53-ctrl.github.io/zap-platform?confirm=${no}`
+      ship_date: shipDate,
+      confirm_url: 'https://0932173810rodney53-ctrl.github.io/zap-platform?confirm='+no
     });
   }catch(e){ console.log('EmailJS error:',e); }
 
