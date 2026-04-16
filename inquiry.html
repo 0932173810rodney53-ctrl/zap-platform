@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>空氣清淨機詢價系統</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#f5f4f0;--white:#fff;--border:#e2e0d6;--ink:#1c1b18;--ink2:#6b6860;--ink3:#a8a69e;--orange:#d4500a;--green:#16a34a;--sans:'Noto Sans TC',sans-serif;--mono:'DM Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh;}
+header{background:var(--orange);padding:20px 24px;text-align:center;}
+.logo{color:#fff;font-size:22px;font-weight:700;margin-bottom:4px;}
+.logo-sub{color:rgba(255,255,255,.75);font-size:13px;}
+main{max-width:560px;margin:32px auto;padding:0 20px 40px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.card-header{padding:18px 20px;border-bottom:1px solid var(--border);background:var(--bg);}
+.card-title{font-size:15px;font-weight:600;}
+.card-sub{font-size:12px;color:var(--ink2);margin-top:3px;}
+.card-body{padding:20px;}
+.fg{display:flex;flex-direction:column;gap:7px;margin-bottom:16px;}
+.fl{font-size:12px;font-weight:500;color:var(--ink2);}
+.req{color:var(--orange);}
+input,textarea{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-family:var(--sans);font-size:14px;color:var(--ink);outline:none;transition:border .15s;width:100%;}
+input:focus,textarea:focus{border-color:var(--orange);background:#fff;}
+textarea{resize:vertical;min-height:80px;}
+.sku-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.sku-btn{border:1.5px solid var(--border);border-radius:8px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg);font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink2);}
+.sku-btn:hover{border-color:var(--orange);color:var(--orange);}
+.sku-btn.selected{border-color:var(--orange);background:#fff7ed;color:var(--orange);font-weight:600;}
+.selected-items{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.sel-row{display:grid;grid-template-columns:100px 1fr;gap:8px;background:var(--bg);border-radius:8px;padding:10px 12px;align-items:center;}
+.sel-sku{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--orange);}
+.sel-row input{padding:8px 10px;font-size:13px;text-align:center;}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:var(--sans);font-size:15px;font-weight:600;transition:all .15s;margin-top:8px;}
+.btn-primary{background:var(--orange);color:#fff;}
+.btn-primary:hover{background:#bf4508;}
+.btn-primary:disabled{background:var(--ink3);cursor:not-allowed;}
+.btn-ghost{background:none;color:var(--ink2);border:1.5px solid var(--border);}
+.success{display:none;text-align:center;padding:40px 20px;}
+.success.show{display:block;}
+.success-icon{font-size:56px;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;}
+.success-text{font-size:14px;color:var(--ink2);line-height:1.8;}
+.success-no{display:inline-block;font-family:var(--mono);font-size:13px;background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green);padding:6px 16px;border-radius:20px;margin-top:12px;}
+footer{text-align:center;padding:20px;font-size:12px;color:var(--ink3);}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">空氣清淨機詢價系統</div>
+  <div class="logo-sub">填寫後業務將於 2 小時內回覆報價</div>
+</header>
+<main>
+  <div id="form-page">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">您的聯絡資料</div>
+        <div class="card-sub">業務將依此資料回覆報價</div>
+      </div>
+      <div class="card-body">
+        <div class="fg"><label class="fl">公司名稱 <span class="req">*</span></label><input type="text" id="f-company" placeholder="請填寫公司全名"></div>
+        <div class="fg"><label class="fl">聯絡人姓名 <span class="req">*</span></label><input type="text" id="f-name" placeholder="請填寫姓名"></div>
+        <div class="fg"><label class="fl">Email <span class="req">*</span></label><input type="email" id="f-email" placeholder="報價單將寄至此信箱"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">電話（選填）</label><input type="tel" id="f-phone" placeholder="方便聯繫的電話"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">詢價品項</div>
+        <div class="card-sub">可複選多個型號，點選後填寫數量</div>
+      </div>
+      <div class="card-body">
+        <div class="sku-grid">
+          <div class="sku-btn" onclick="toggleSku('ZAP-200')">ZAP-200</div>
+          <div class="sku-btn" onclick="toggleSku('ZAP-400')">ZAP-400</div>
+          <div class="sku-btn" onclick="toggleSku('ZAP-600')">ZAP-600</div>
+          <div class="sku-btn" onclick="toggleSku('ZAP-800')">ZAP-800</div>
+          <div class="sku-btn" onclick="toggleSku('ZAP-1200')">ZAP-1200</div>
+          <div class="sku-btn" onclick="toggleSku('ZAP-1600')">ZAP-1600</div>
+        </div>
+        <div class="selected-items" id="selected-items"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">其他需求</div></div>
+      <div class="card-body">
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">備註（選填）</label>
+          <textarea id="f-note" placeholder="如：急單、指定交貨日期等"></textarea>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="submit-btn" onclick="submitInquiry()">送出詢價</button>
+  </div>
+  <div class="success" id="success-page">
+    <div class="success-icon">✅</div>
+    <div class="success-title">詢價已送出！</div>
+    <div class="success-text">感謝您的詢價<br>業務將在 <strong>2 小時內</strong> 寄送正式報價單至您的信箱<br>如有緊急需求請致電：<strong>02-XXXX-XXXX</strong></div>
+    <div class="success-no" id="inquiry-no"></div>
+    <br><br>
+    <button class="btn btn-ghost" onclick="location.reload()" style="max-width:200px;margin:0 auto">再次詢價</button>
+  </div>
+</main>
+<footer>空氣清淨機專業製造商</footer>
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbx5rpoJpPEU3ddLpRFbAccJtQVTj_5QX9jL56BbT4Qy-qBvqgFQ5lwrtybvB_SbbcJl/exec';
+const selected={};
+
+function toggleSku(sku){
+  const btn=document.querySelector(`.sku-btn[onclick="toggleSku('${sku}')"]`);
+  if(selected[sku]){delete selected[sku];btn.classList.remove('selected');}
+  else{selected[sku]=1;btn.classList.add('selected');}
+  renderSelected();
+}
+
+function renderSelected(){
+  const el=document.getElementById('selected-items');
+  const items=Object.entries(selected);
+  if(!items.length){el.innerHTML='';return;}
+  el.innerHTML=items.map(([sku,qty])=>`
+    <div class="sel-row">
+      <div class="sel-sku">${sku}</div>
+      <input type="number" min="1" value="${qty}" placeholder="數量（台）"
+        oninput="selected['${sku}']=parseInt(this.value)||1">
+    </div>`).join('');
+}
+
+async function submitInquiry(){
+  const company=document.getElementById('f-company').value.trim();
+  const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  const note=document.getElementById('f-note').value.trim();
+
+  if(!company){alert('請填寫公司名稱');return;}
+  if(!name){alert('請填寫聯絡人姓名');return;}
+  if(!email){alert('請填寫 Email');return;}
+  if(!Object.keys(selected).length){alert('請至少選擇一個型號');return;}
+
+  const itemText=Object.entries(selected).map(([sku,qty])=>`${sku} x ${qty}台`).join('、');
+  const no='INQ-'+Date.now().toString().slice(-6);
+
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='送出中...';
+
+  // 用 no-cors 方式寫入 Google Sheets
+  try{
+    fetch(GAS_URL,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        action:'addInquiry',
+        詢價單號:no,
+        公司名稱:company,
+        聯絡人:name,
+        Email:email,
+        電話:phone||'未填',
+        詢價品項:itemText,
+        備註:note||'無'
+      })
+    });
+  }catch(e){}
+
+  // Web3Forms 通知業務
+  try{
+    await fetch('https://api.web3forms.com/submit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        access_key:'8785228a-adfe-4f30-8bf2-5d3efad4a0ee',
+        subject:`【新詢價】${company} - ${no}`,
+        from_name:'詢價系統',
+        公司名稱:company,
+        聯絡人:name,
+        Email:email,
+        電話:phone||'未填',
+        詢價品項:itemText,
+        備註:note||'無',
+        詢價單號:no,
+        管理平台:'https://0932173810rodney53-ctrl.github.io/zap-platform'
+      })
+    });
+  }catch(e){}
+
+  // 顯示成功
+  document.getElementById('inquiry-no').textContent='詢價單號：'+no;
+  document.getElementById('form-page').style.display='none';
+  document.getElementById('success-page').classList.add('show');
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('kZ_eZRB-0i4utfReI');</script>
+</body>
+</html>
