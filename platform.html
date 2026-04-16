@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理平台系統</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#f5f4f0;--white:#fff;--border:#e2e0d6;--ink:#1c1b18;--ink2:#6b6860;--ink3:#a8a69e;--orange:#d4500a;--green:#16a34a;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--sans:'Noto Sans TC',sans-serif;--mono:'DM Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;min-height:100vh;}
+
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:380px;}
+.login-icon{width:56px;height:56px;background:var(--orange);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;margin:0 auto 12px;}
+.login-title{font-size:20px;font-weight:700;text-align:center;}
+.login-sub{font-size:13px;color:var(--ink2);margin-top:4px;text-align:center;margin-bottom:28px;}
+.lfg{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.ll{font-size:12px;font-weight:500;color:var(--ink2);}
+.li{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:12px 14px;font-family:var(--sans);font-size:14px;color:var(--ink);outline:none;transition:border .15s;width:100%;}
+.li:focus{border-color:var(--orange);background:#fff;}
+.lbtn{width:100%;padding:13px;border-radius:9px;border:none;cursor:pointer;background:var(--orange);color:#fff;font-family:var(--sans);font-size:15px;font-weight:600;margin-top:4px;transition:all .15s;}
+.lbtn:hover{background:#bf4508;}
+.lerr{color:var(--red);font-size:12px;text-align:center;margin-top:8px;display:none;}
+
+.app{display:none;}
+.app.show{display:block;}
+
+header{background:var(--orange);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.hl{color:#fff;font-size:16px;font-weight:700;}
+.hu{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.9);font-size:13px;}
+.hrole{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;}
+.hout{background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--sans);}
+
+.nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:0;overflow-x:auto;}
+.nb{padding:13px 18px;font-size:13px;font-weight:500;color:var(--ink2);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;}
+.nb:hover{color:var(--ink);}
+.nb.active{color:var(--orange);border-bottom-color:var(--orange);}
+.nbadge{display:inline-block;background:#fef2f2;color:var(--red);font-size:10px;font-family:var(--mono);padding:1px 5px;border-radius:3px;margin-left:4px;}
+
+main{max-width:1100px;margin:0 auto;padding:20px;}
+.page{display:none;}
+.page.active{display:block;}
+
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.kl{font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.kv{font-family:var(--mono);font-size:28px;font-weight:500;line-height:1;}
+.kn{font-size:12px;color:var(--ink2);margin-top:6px;}
+
+.panel{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.pht{font-size:13px;font-weight:600;}
+.pb{padding:16px 18px;}
+
+table{width:100%;border-collapse:collapse;}
+thead th{font-size:11px;font-weight:500;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--bg);transition:background .1s;}
+tbody tr:hover{background:var(--bg);}
+tbody td{padding:12px 14px;font-size:13px;color:var(--ink2);}
+tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);font-size:12px;}
+
+.tag{display:inline-flex;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.t-orange{background:#fff7ed;color:var(--orange);border:1px solid #fed7aa;}
+.t-blue{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;}
+.t-green{background:#f0fdf4;color:var(--green);border:1px solid #bbf7d0;}
+.t-amber{background:#fffbeb;color:var(--amber);border:1px solid #fde68a;}
+.t-gray{background:var(--bg);color:var(--ink2);border:1px solid var(--border);}
+
+.btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:7px 14px;border-radius:7px;border:none;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--orange);color:#fff;}
+.btn-primary:hover{background:#bf4508;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#15803d;}
+.btn-ghost{background:none;color:var(--ink2);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--orange);color:var(--orange);}
+
+.pform{background:var(--bg);border-radius:8px;padding:14px;margin-top:8px;display:none;}
+.pform.show{display:block;}
+.pitem{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin-bottom:8px;}
+.psku{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--orange);}
+
+.ai-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:11px 14px;display:flex;gap:10px;margin-bottom:14px;}
+.ai-icon{font-size:15px;flex-shrink:0;}
+.ai-text{font-size:12px;color:#92400e;line-height:1.6;}
+.ai-text strong{color:var(--orange);}
+
+.loading{text-align:center;padding:32px;color:var(--ink3);font-size:13px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;display:none;z-index:999;}
+.toast.show{display:block;animation:up .3s ease;}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media(max-width:600px){
+  .krow{grid-template-columns:1fr 1fr;}
+  thead{display:none;}
+  tbody tr{display:block;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;padding:4px;}
+  tbody td{display:flex;justify-content:space-between;padding:8px 10px;border:none;font-size:12px;}
+  tbody td::before{content:attr(data-label);color:var(--ink3);font-size:11px;margin-right:8px;}
+}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-page">
+  <div class="login-box">
+    <div class="login-icon">🌬</div>
+    <div class="login-title">管理平台系統</div>
+    <div class="login-sub">請登入您的帳號</div>
+    <div class="lfg"><label class="ll">帳號</label><input class="li" type="text" id="la" placeholder="請輸入帳號"></div>
+    <div class="lfg"><label class="ll">密碼</label><input class="li" type="password" id="lp" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="lbtn" onclick="doLogin()" id="lbtn">登入</button>
+    <div class="lerr" id="lerr">帳號或密碼錯誤，請重試</div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <header>
+    <div class="hl">🌬 管理平台系統</div>
+    <div class="hu">
+      <span id="hname"></span>
+      <span class="hrole" id="hrole"></span>
+      <button class="hout" onclick="doLogout()">登出</button>
+    </div>
+  </header>
+  <div class="nav" id="nav"></div>
+  <main>
+    <div class="page" id="page-dashboard">
+      <div class="ai-box"><div class="ai-icon">🤖</div><div class="ai-text" id="dai">載入中...</div></div>
+      <div class="krow" id="dkpi"></div>
+      <div class="panel">
+        <div class="ph">
+          <span class="pht">全部訂單</span>
+          <button class="btn btn-ghost" onclick="loadData()">🔄 重新整理</button>
+        </div>
+        <table><thead><tr>
+          <th>詢價單號</th><th>公司</th><th>品項</th><th>負責業務</th><th>狀態</th><th>時間</th>
+        </tr></thead><tbody id="dtable"><tr><td colspan="6" class="loading">載入中...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-pending">
+      <div class="ai-box"><div class="ai-icon">🤖</div><div class="ai-text"><strong>AI 提示：</strong>以下是待報價詢價單，填入各品項單價後送出，客戶將收到 Email 通知。</div></div>
+      <div class="panel">
+        <div class="ph">
+          <span class="pht">待報價詢價單</span>
+          <button class="btn btn-ghost" onclick="loadData()">🔄 重新整理</button>
+        </div>
+        <table><thead><tr>
+          <th>詢價單號</th><th>公司</th><th>聯絡人</th><th>品項</th><th>狀態</th><th>操作</th>
+        </tr></thead><tbody id="ptable"><tr><td colspan="6" class="loading">載入中...</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-stock">
+      <div class="ai-box"><div class="ai-icon">&#x1F916;</div><div class="ai-text" id="stock-ai">載入中...</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="panel">
+          <div class="ph">
+            <span class="pht">各型號庫存</span>
+            <button class="btn btn-ghost" onclick="loadStock()">重新整理</button>
+          </div>
+          <table><thead><tr>
+            <th>型號</th><th>現有</th><th>安全庫存</th><th>狀態</th><th>操作</th>
+          </tr></thead><tbody id="stock-table"><tr><td colspan="5" class="loading">載入中...</td></tr></tbody></table>
+        </div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="ph">
+            <span class="pht">Excel 批次上傳庫存</span>
+            <span class="badge b-blue">支援 .xlsx .csv</span>
+          </div>
+          <div class="pb">
+            <div style="border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px" 
+                 onclick="document.getElementById('excel-upload').click()"
+                 id="drop-zone">
+              <div style="font-size:28px;margin-bottom:8px">📂</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">點擊選擇 Excel 或 CSV 檔案</div>
+              <div style="font-size:11px;color:var(--ink3);margin-top:4px">格式：型號, 數量（每行一筆）</div>
+            </div>
+            <input type="file" id="excel-upload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(this)">
+            <div id="upload-preview" style="display:none;margin-bottom:12px">
+              <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:8px">預覽（確認後上傳）：</div>
+              <div id="upload-preview-table"></div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="btn btn-green" onclick="confirmExcelUpload()" style="flex:1;padding:10px">確認上傳庫存</button>
+                <button class="btn btn-ghost" onclick="cancelExcelUpload()" style="padding:10px">取消</button>
+              </div>
+            </div>
+            <div style="background:var(--bg);border-radius:6px;padding:10px;font-size:11px;color:var(--ink3)">
+              <strong>Excel 格式範例：</strong><br>
+              A欄：型號（ZAP-200）<br>
+              B欄：數量（100）
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph"><span class="pht">手動調整庫存</span></div>
+          <div class="pb">
+            <div style="margin-bottom:12px"><div class="ll" style="font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:6px">型號</div>
+              <select id="adj-sku" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--ink);width:100%;outline:none;">
+                <option>ZAP-200</option><option>ZAP-400</option><option>ZAP-600</option>
+                <option>ZAP-800</option><option>ZAP-1200</option><option>ZAP-1600</option>
+              </select>
+            </div>
+            <div style="margin-bottom:12px"><div class="ll" style="font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:6px">異動類型</div>
+              <select id="adj-type" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--ink);width:100%;outline:none;">
+                <option value="入庫">入庫（增加庫存）</option>
+                <option value="出庫">出庫（減少庫存）</option>
+                <option value="盤點">盤點調整</option>
+              </select>
+            </div>
+            <div style="margin-bottom:12px"><div class="ll" style="font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:6px">數量</div>
+              <input type="number" id="adj-qty" min="1" value="1" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--ink);width:100%;outline:none;">
+            </div>
+            <div style="margin-bottom:12px"><div class="ll" style="font-size:11px;font-weight:500;color:var(--ink2);margin-bottom:6px">備註（選填）</div>
+              <input type="text" id="adj-note" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:13px;color:var(--ink);width:100%;outline:none;">
+            </div>
+            <button class="btn btn-primary" onclick="adjustStock()" style="width:100%;padding:10px">確認調整庫存</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pht">進銷存記錄</span></div>
+        <table><thead><tr>
+          <th>日期</th><th>型號</th><th>異動</th><th>數量</th><th>單號</th><th>備註</th>
+        </tr></thead><tbody id="log-table"><tr><td colspan="6" class="loading">載入中...</td></tr></tbody></table>
+      </div>
+    </div>
+    <div class="page" id="page-myorders">
+      <div class="panel">
+        <div class="ph">
+          <span class="pht" id="myorders-title">我的訂單</span>
+          <button class="btn btn-ghost" onclick="loadData()">🔄 重新整理</button>
+        </div>
+        <table><thead><tr>
+          <th>詢價單號</th><th>公司</th><th>品項</th><th>報價</th><th>狀態</th><th>出貨狀態</th><th>時間</th>
+        </tr></thead><tbody id="mtable"><tr><td colspan="6" class="loading">載入中...</td></tr></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbx5rpoJpPEU3ddLpRFbAccJtQVTj_5QX9jL56BbT4Qy-qBvqgFQ5lwrtybvB_SbbcJl/exec';
+const LOCAL_ACCOUNTS=[
+  {account:'admin',  password:'admin123',name:'主管',  role:'主管'},
+  {account:'sales01',password:'sales01', name:'業務1',role:'業務'},
+  {account:'sales02',password:'sales02', name:'業務2',role:'業務'},
+  {account:'sales03',password:'sales03', name:'業務3',role:'業務'},
+  {account:'sales04',password:'sales04', name:'業務4',role:'業務'},
+  {account:'sales05',password:'sales05', name:'業務5',role:'業務'},
+  {account:'sales06',password:'sales06', name:'業務6',role:'業務'},
+  {account:'sales07',password:'sales07', name:'業務7',role:'業務'},
+  {account:'sales08',password:'sales08', name:'業務8',role:'業務'},
+];
+let user=null;
+let allOrders=[];
+
+// ── 登入 ──
+async function doLogin(){
+  const a=document.getElementById('la').value.trim();
+  const p=document.getElementById('lp').value.trim();
+  if(!a||!p){showErr('請填寫帳號和密碼');return;}
+  const btn=document.getElementById('lbtn');
+  btn.textContent='登入中...';btn.disabled=true;
+
+  try{
+    const res=await fetch(API,{method:'POST',body:JSON.stringify({action:'login',account:a,password:p})});
+    const data=await res.json();
+    if(data.status==='success'){
+      user={...data};
+      localStorage.setItem('zap_u',JSON.stringify(user));
+      showApp();
+    } else {
+      tryLocal(a,p);
+    }
+  } catch(e){ tryLocal(a,p); }
+  btn.textContent='登入';btn.disabled=false;
+}
+
+function tryLocal(a,p){
+  const u=LOCAL_ACCOUNTS.find(x=>x.account===a&&x.password===p);
+  if(u){ user={...u,token:'local',status:'success'}; localStorage.setItem('zap_u',JSON.stringify(user)); showApp(); }
+  else showErr('帳號或密碼錯誤，請重試');
+}
+
+function showErr(msg){ const e=document.getElementById('lerr'); e.textContent=msg; e.style.display='block'; }
+
+function doLogout(){
+  localStorage.removeItem('zap_u'); user=null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('la').value='';
+  document.getElementById('lp').value='';
+  document.getElementById('lerr').style.display='none';
+}
+
+// ── 主應用 ──
+function showApp(){
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app').classList.add('show');
+  document.getElementById('hname').textContent=user.name;
+  document.getElementById('hrole').textContent=user.role;
+  buildNav();
+  loadData();
+  setInterval(loadData, 30000); // 每30秒自動更新
+}
+
+function buildNav(){
+  const nav=document.getElementById('nav');
+  if(user.role==='主管'){
+    nav.innerHTML=`
+      <button class="nb active" onclick="showPage('dashboard',this)">總覽儀表板</button>
+      <button class="nb" onclick="showPage('pending',this)">待報價 <span class="nbadge" id="nbp">0</span></button>
+      <button class="nb" onclick="showPage('myorders',this)">所有訂單</button>
+      <button class="nb" onclick="showPage('stock',this)">庫存管理</button>`;
+    document.getElementById('myorders-title').textContent='所有訂單';
+  } else {
+    nav.innerHTML=`
+      <button class="nb active" onclick="showPage('pending',this)">待報價 <span class="nbadge" id="nbp">0</span></button>
+      <button class="nb" onclick="showPage('myorders',this)">我的訂單</button>`;
+    showPage('pending',nav.querySelector('.nb'));
+  }
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ── 載入資料（從 Google Sheets）──
+async function loadData(){
+  try{
+    const url=`${API}?action=getOrders&token=${encodeURIComponent(user.token||'')}`;
+    const res=await fetch(url);
+    const data=await res.json();
+    if(data.status==='success'){
+      allOrders=data.data||[];
+      renderAll(allOrders, data.account||user?.account||'');
+      return;
+    }
+  } catch(e){}
+  // 若讀取失敗，用空資料
+  allOrders=[];
+  renderAll([],user.account);
+}
+
+function renderAll(orders, account){
+  const pending=orders.filter(o=>o['狀態']==='待報價');
+  const nb=document.getElementById('nbp');
+  if(nb) nb.textContent=pending.length;
+
+  if(user && user.role==='主管') renderDashboard(orders);
+  renderPending(pending);
+  renderMyOrders(orders, account||user?.account||'');
+}
+
+// ── 主管儀表板 ──
+function renderDashboard(orders){
+  const total=orders.length;
+  const pending=orders.filter(o=>o['狀態']==='待報價').length;
+  const quoted=orders.filter(o=>o['狀態']==='已報價').length;
+  const confirmed=orders.filter(o=>o['狀態']==='訂單成立').length;
+
+  document.getElementById('dkpi').innerHTML=`
+    <div class="kpi"><div class="kl">總詢價數</div><div class="kv">${total}</div><div class="kn">筆</div></div>
+    <div class="kpi"><div class="kl">待報價</div><div class="kv" style="color:var(--amber)">${pending}</div><div class="kn">需處理</div></div>
+    <div class="kpi"><div class="kl">已報價</div><div class="kv" style="color:var(--blue)">${quoted}</div><div class="kn">等待確認</div></div>
+    <div class="kpi"><div class="kl">訂單成立</div><div class="kv" style="color:var(--green)">${confirmed}</div><div class="kn">筆</div></div>`;
+
+  const rate=total>0?Math.round(confirmed/total*100):0;
+  document.getElementById('dai').innerHTML=
+    `<strong>AI 分析：</strong>共 <strong>${total}</strong> 筆詢價，<strong>${pending}</strong> 筆待報價。訂單成立率 <strong style="color:var(--green)">${rate}%</strong>。${pending>0?'建議業務盡快處理待報價單。':'目前無待處理事項。'}`;
+
+  document.getElementById('dtable').innerHTML=orders.length===0
+    ?'<tr><td colspan="6" class="loading">尚無資料，等待客戶詢價</td></tr>'
+    :orders.map(o=>`<tr>
+      <td data-label="單號">${o['詢價單號']||''}</td>
+      <td data-label="公司">${o['公司名稱']||''}</td>
+      <td data-label="品項" style="font-size:11px;max-width:180px">${o['詢價品項']||''}</td>
+      <td data-label="業務">${o['負責業務']||'未分配'}</td>
+      <td data-label="狀態">${stag(o['狀態'])}</td>
+      <td data-label="時間" style="font-size:11px">${o['建立時間']||''}</td>
+    </tr>`).join('');
+}
+
+// ── 待報價 ──
+function renderPending(pending){
+  document.getElementById('ptable').innerHTML=pending.length===0
+    ?'<tr><td colspan="6" class="loading">目前無待報價詢價單 ✓</td></tr>'
+    :pending.map(o=>`
+      <tr>
+        <td data-label="單號">${o['詢價單號']}</td>
+        <td data-label="公司">${o['公司名稱']}</td>
+        <td data-label="聯絡人">${o['聯絡人']}</td>
+        <td data-label="品項" style="font-size:11px">${o['詢價品項']}</td>
+        <td data-label="狀態">${stag(o['狀態'])}</td>
+        <td data-label="操作">
+          <button class="btn btn-primary" onclick="showPForm('${o['詢價單號']}','${o['詢價品項']}','${o['Email']}','${o['公司名稱']}')">填報價</button>
+        </td>
+      </tr>
+      <tr id="pr-${o['詢價單號']}"><td colspan="6" style="padding:0">
+        <div class="pform" id="pf-${o['詢價單號']}">
+          <div id="pi-${o['詢價單號']}"></div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-green" onclick="sendPrice('${o['詢價單號']}','${o['Email']}','${o['公司名稱']}')">送出報價給客戶</button>
+            <button class="btn btn-ghost" onclick="hidePForm('${o['詢價單號']}')">取消</button>
+          </div>
+        </div>
+      </td></tr>`).join('');
+}
+
+function showPForm(no,items,email,company){
+  document.getElementById('pf-'+no).classList.add('show');
+  const skus=items.split('、').map(s=>s.trim());
+  document.getElementById('pi-'+no).innerHTML=skus.map(s=>`
+    <div class="pitem">
+      <div class="psku">${s}</div>
+      <input type="number" placeholder="單價（元/台）" id="pp-${no}-${s.replace(/[\s\-]/g,'')}"
+        style="padding:8px 10px;font-size:13px;background:var(--white);border:1px solid var(--border);border-radius:6px;width:100%;outline:none;">
+    </div>`).join('');
+}
+
+function hidePForm(no){ document.getElementById('pf-'+no).classList.remove('show'); }
+
+async function sendPrice(no,email,company){
+  const pf=document.getElementById('pf-'+no);
+  const inputs=pf.querySelectorAll('input[type="number"]');
+  let priceText=''; let ok=true;
+  inputs.forEach(inp=>{
+    if(!inp.value){ok=false;return;}
+    const sku=inp.placeholder;
+    priceText+=inp.id.replace(`pp-${no}-`,'')+': $'+parseFloat(inp.value).toLocaleString()+'/台　';
+  });
+  if(!ok){showToast('⚠ 請填寫所有品項的單價');return;}
+
+  // 更新 Google Sheets
+  try{
+    await fetch(API,{method:'POST',body:JSON.stringify({
+      action:'updatePrice',token:user.token||'local',
+      詢價單號:no,報價內容:priceText
+    })});
+  }catch(e){}
+
+  // 用 EmailJS 寄出帶按鈕的 HTML 報價信給客戶
+  try{
+    await emailjs.send('service_wdu9pis','template_vrw4sui',{
+      to_email: email,
+      client_name: company,
+      company: company,
+      order_no: no,
+      price_content: priceText,
+      confirm_url: `https://harmonious-sherbet-2dd31a.netlify.app?confirm=${no}`
+    });
+  }catch(e){ console.log('EmailJS error:',e); }
+
+  showToast('✅ 報價已送出！客戶將收到 Email 通知。');
+  hidePForm(no);
+  setTimeout(loadData,1000);
+}
+
+// ── 我的訂單 ──
+function renderMyOrders(orders,account){
+  const mine=user?.role==='主管'?orders:orders.filter(o=>o['負責業務']===(account||'') ||o['狀態']==='待報價');
+  document.getElementById('mtable').innerHTML=mine.length===0
+    ?'<tr><td colspan="6" class="loading">尚無訂單</td></tr>'
+    :mine.map(function(o){
+      var shipStatus = o['出貨狀態']||'';
+      var shipTag = shipStatus==='待出貨'
+        ? '<span class="tag t-green">庫存充足，待出貨</span>'
+        : shipStatus==='待生產'
+        ? '<span class="tag t-amber">庫存不足，待生產</span>'
+        : '<span class="tag t-gray">–</span>';
+      return '<tr>' +
+        '<td data-label="單號">'+(o['詢價單號']||'')+'</td>' +
+        '<td data-label="公司">'+(o['公司名稱']||'')+'</td>' +
+        '<td data-label="品項" style="font-size:11px">'+(o['詢價品項']||'')+'</td>' +
+        '<td data-label="報價" style="font-size:11px;color:var(--ink2)">'+(o['業務報價']||'–')+'</td>' +
+        '<td data-label="狀態">'+stag(o['狀態'])+'</td>' +
+        '<td data-label="出貨狀態">'+shipTag+'</td>' +
+        '<td data-label="時間" style="font-size:11px">'+(o['建立時間']||'')+'</td>' +
+        '</tr>';
+    }).join('');
+}
+
+// ── 客戶確認連結 ──
+const params=new URLSearchParams(window.location.search);
+const cno=params.get('confirm');
+if(cno){
+  document.getElementById('login-page').style.display='none';
+  document.body.innerHTML=`
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:var(--sans);padding:20px">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px;max-width:400px;width:100%;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">📋</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px">確認報價單</div>
+        <div style="font-size:14px;color:var(--ink2);margin-bottom:6px">詢價單號：<strong>${cno}</strong></div>
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:24px;line-height:1.7">請確認您已收到報價，並同意以報價單上的金額下單。</div>
+        <button onclick="clientOK('${cno}')" style="width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;background:var(--orange);color:#fff;font-size:15px;font-weight:600;font-family:var(--sans)">確認接受報價，成立訂單</button>
+        <button onclick="history.back()" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:none;color:var(--ink2);font-size:14px;font-family:var(--sans);margin-top:10px;cursor:pointer">取消</button>
+      </div>
+    </div>`;
+}
+
+async function clientOK(no){
+  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'confirmOrder',詢價單號:no})}); }catch(e){}
+  document.body.innerHTML=`
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:var(--sans)">
+      <div style="text-align:center;padding:40px">
+        <div style="font-size:64px;margin-bottom:16px">✅</div>
+        <div style="font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px">訂單已確認成立！</div>
+        <div style="font-size:14px;color:var(--ink2);line-height:1.8">訂單編號：<strong>${no}</strong><br>感謝您的確認，我們將盡快安排生產與出貨。</div>
+      </div>
+    </div>`;
+}
+
+
+// Stock Management
+async function loadStock(){
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'getStock',token:user.token||''})});
+    var data=await res.json();
+    if(data.status==='success'){ renderStock(data.data); loadStockLog(); return; }
+  }catch(e){}
+  renderStock({});
+}
+
+function renderStock(stock){
+  var skus=['ZAP-200','ZAP-400','ZAP-600','ZAP-800','ZAP-1200','ZAP-1600'];
+  var lowCount=0;
+  var html='';
+  for(var k=0;k<skus.length;k++){
+    var sku=skus[k];
+    var s=stock[sku]||{qty:0,safety:10};
+    var qty=parseInt(s.qty)||0;
+    var safety=parseInt(s.safety)||10;
+    var color=qty===0?'var(--red)':qty<safety?'var(--amber)':'var(--green)';
+    var stxt=qty===0?'缺貨':qty<safety?'偏低':'充足';
+    var scls=qty===0?'t-red':qty<safety?'t-amber':'t-green';
+    if(qty<safety) lowCount++;
+    html+='<tr>';
+    html+='<td>'+sku+'</td>';
+    html+='<td style="font-family:var(--mono);font-weight:600;color:'+color+'">'+qty+'</td>';
+    html+='<td style="font-family:var(--mono)">'+safety+'</td>';
+    html+='<td><span class="tag '+scls+'">'+stxt+'</span></td>';
+    html+='<td><button class="btn btn-ghost" onclick="setAdjSku(\''+sku+'\')">調整</button></td>';
+    html+='</tr>';
+  }
+  document.getElementById('stock-table').innerHTML=html||'<tr><td colspan="5" class="loading">無資料</td></tr>';
+  var aiEl=document.getElementById('stock-ai');
+  if(aiEl){
+    if(lowCount>0){
+      aiEl.innerHTML='<strong>AI 提醒：</strong>有 '+lowCount+' 個型號庫存偏低或缺貨，建議盡快安排生產補貨。';
+    } else {
+      aiEl.innerHTML='<strong>AI 分析：</strong>所有型號庫存充足，目前無需補貨。';
+    }
+  }
+}
+
+async function loadStockLog(){
+  try{
+    var res=await fetch(API+'?action=getStockLog&token='+encodeURIComponent(user.token||''));
+    var data=await res.json();
+    if(data.status==='success'){
+      var logs=data.data||[];
+      if(logs.length===0){
+        document.getElementById('log-table').innerHTML='<tr><td colspan="6" class="loading">尚無進銷存記錄</td></tr>';
+        return;
+      }
+      var html='';
+      var max=Math.min(logs.length,20);
+      for(var i=0;i<max;i++){
+        var l=logs[i];
+        var type=l['\u7570\u52d5\u985e\u578b']||'';
+        var tcls=type==='\u5165\u5eab'?'t-green':type==='\u51fa\u5eab'?'t-red':'t-blue';
+        html+='<tr>';
+        html+='<td style="font-size:11px">'+(l['\u65e5\u671f']||'')+'</td>';
+        html+='<td>'+(l['\u578b\u865f']||'')+'</td>';
+        html+='<td><span class="tag '+tcls+'">'+type+'</span></td>';
+        html+='<td style="font-family:var(--mono)">'+(l['\u6578\u91cf']||'')+'</td>';
+        html+='<td style="font-family:var(--mono);font-size:11px">'+(l['\u95dc\u806f\u55ae\u865f']||'-')+'</td>';
+        html+='<td style="font-size:12px">'+(l['\u5099\u8a3b']||'-')+'</td>';
+        html+='</tr>';
+      }
+      document.getElementById('log-table').innerHTML=html;
+      return;
+    }
+  }catch(e){}
+  document.getElementById('log-table').innerHTML='<tr><td colspan="6" class="loading">載入失敗</td></tr>';
+}
+
+
+// Excel Upload
+var excelData = [];
+
+function handleExcelUpload(input){
+  var file = input.files[0];
+  if(!file){ return; }
+  var reader = new FileReader();
+  
+  if(file.name.endsWith('.csv')){
+    reader.onload = function(e){
+      var lines = e.target.result.split('\n');
+      excelData = [];
+      for(var i=0;i<lines.length;i++){
+        var parts = lines[i].split(',');
+        if(parts.length>=2 && parts[0].trim()){
+          var sku = parts[0].trim();
+          var qty = parseInt(parts[1].trim())||0;
+          if(sku && qty>0) excelData.push({sku:sku, qty:qty});
+        }
+      }
+      showExcelPreview();
+    };
+    reader.readAsText(file, 'UTF-8');
+  } else {
+    // xlsx 需要 SheetJS
+    reader.onload = function(e){
+      try{
+        var data = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, {type:'array'});
+        var sheet = workbook.Sheets[workbook.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(sheet, {header:1});
+        excelData = [];
+        for(var i=0;i<rows.length;i++){
+          if(rows[i].length>=2 && rows[i][0]){
+            var sku = String(rows[i][0]).trim();
+            var qty = parseInt(rows[i][1])||0;
+            if(sku && qty>0) excelData.push({sku:sku, qty:qty});
+          }
+        }
+        showExcelPreview();
+      }catch(err){
+        showToast('讀取失敗，請改用 CSV 格式');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+function showExcelPreview(){
+  if(!excelData.length){ showToast('未找到有效資料'); return; }
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html += '<tr style="background:var(--bg)"><th style="padding:6px 10px;text-align:left">型號</th><th style="padding:6px 10px;text-align:left">數量</th></tr>';
+  for(var i=0;i<excelData.length;i++){
+    html += '<tr style="border-bottom:1px solid var(--bg)">';
+    html += '<td style="padding:6px 10px;font-family:var(--mono)">' + excelData[i].sku + '</td>';
+    html += '<td style="padding:6px 10px;font-family:var(--mono)">' + excelData[i].qty + '</td>';
+    html += '</tr>';
+  }
+  html += '</table>';
+  document.getElementById('upload-preview-table').innerHTML = html;
+  document.getElementById('upload-preview').style.display = 'block';
+}
+
+async function confirmExcelUpload(){
+  if(!excelData.length){ return; }
+  var success = 0;
+  for(var i=0;i<excelData.length;i++){
+    try{
+      var res = await fetch(API,{method:'POST',body:JSON.stringify({
+        action:'updateStock', token:user.token||'',
+        sku:excelData[i].sku, type:'\u76e4\u9ede',
+        qty:excelData[i].qty, note:'Excel\u4e0a\u50b3', orderNo:''
+      })});
+      var data = await res.json();
+      if(data.status==='success') success++;
+    }catch(e){}
+  }
+  showToast('\u5df2\u66f4\u65b0 ' + success + ' \u500b\u578b\u865f\u5eab\u5b58');
+  cancelExcelUpload();
+  loadStock();
+}
+
+function cancelExcelUpload(){
+  excelData = [];
+  document.getElementById('upload-preview').style.display = 'none';
+  document.getElementById('excel-upload').value = '';
+}
+
+function setAdjSku(sku){
+  document.getElementById('adj-sku').value=sku;
+  document.getElementById('adj-qty').focus();
+}
+
+async function adjustStock(){
+  var sku=document.getElementById('adj-sku').value;
+  var type=document.getElementById('adj-type').value;
+  var qty=parseInt(document.getElementById('adj-qty').value)||0;
+  var note=document.getElementById('adj-note').value;
+  if(!qty||qty<1){showToast('請填寫正確數量');return;}
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({
+      action:'updateStock',token:user.token||'',
+      sku:sku,type:type,qty:qty,note:note,orderNo:''
+    })});
+    var data=await res.json();
+    if(data.status==='success'){
+      showToast(sku+' '+type+' '+qty+' 台，庫存已更新');
+      document.getElementById('adj-qty').value='1';
+      document.getElementById('adj-note').value='';
+      loadStock();
+      return;
+    }
+  }catch(e){}
+  showToast('更新失敗，請重試');
+}
+
+function stag(s){
+  const m={'待報價':'t-orange','已報價':'t-blue','訂單成立':'t-green','已取消':'t-gray'};
+  return `<span class="tag ${m[s]||'t-gray'}">${s||'–'}</span>`;
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// 自動登入
+const saved=localStorage.getItem('zap_u');
+if(saved&&!cno){try{user=JSON.parse(saved);showApp();}catch(e){}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('kZ_eZRB-0i4utfReI');</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
