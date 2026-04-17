@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>確認收貨 — ADDWII</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f4f0;--white:#fff;--border:#e2e0d6;
+  --ink:#1c1b18;--ink2:#6b6860;--ink3:#a8a69e;
+  --orange:#d4500a;--green:#16a34a;--red:#dc2626;
+  --sans:'Noto Sans TC',sans-serif;--mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
+
+header{
+  background:var(--ink);padding:0 24px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{color:#fff;font-size:16px;font-weight:700;letter-spacing:.08em;}
+.logo span{color:var(--orange);}
+
+main{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:40px 20px;
+}
+
+.card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:16px;padding:40px 32px;
+  max-width:440px;width:100%;text-align:center;
+}
+
+.icon-wrap{
+  width:72px;height:72px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;font-size:32px;
+}
+.icon-confirm{background:#f0fdf4;}
+.icon-done{background:#f0fdf4;}
+.icon-error{background:#fef2f2;}
+
+.title{font-size:20px;font-weight:700;margin-bottom:8px;}
+.subtitle{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:24px;}
+
+.order-no{
+  background:var(--bg);border-radius:10px;padding:14px 20px;
+  margin-bottom:20px;
+}
+.order-no-label{font-size:11px;color:var(--ink3);letter-spacing:.08em;margin-bottom:4px;}
+.order-no-value{font-size:18px;font-weight:700;color:var(--ink);}
+
+.btn{
+  width:100%;padding:14px;border-radius:10px;border:none;
+  cursor:pointer;font-family:var(--sans);font-size:15px;
+  font-weight:600;transition:all .2s;
+}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#15803d;}
+.btn-ghost{
+  background:none;border:1.5px solid var(--border);
+  color:var(--ink2);font-size:14px;margin-top:10px;
+}
+.btn-ghost:hover{border-color:var(--ink2);color:var(--ink);}
+
+.success-wrap{display:none;}
+.confirm-wrap{display:block;}
+.error-wrap{display:none;}
+
+footer{
+  text-align:center;padding:20px;
+  font-size:12px;color:var(--ink3);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ADD<span>WII</span></div>
+</header>
+
+<main>
+
+  <!-- 確認頁 -->
+  <div class="card confirm-wrap" id="confirm-wrap">
+    <div class="icon-wrap icon-confirm">📦</div>
+    <div class="title">確認收貨</div>
+    <div class="subtitle">請確認您已收到所有貨物，<br>確認後訂單將正式完結。</div>
+    <div class="order-no">
+      <div class="order-no-label">訂單編號</div>
+      <div class="order-no-value" id="order-no-display">載入中...</div>
+    </div>
+    <button class="btn btn-green" onclick="doConfirm()">✅ 確認已收到全部貨物</button>
+    <button class="btn btn-ghost" onclick="notYet()">尚未收到，稍後再確認</button>
+  </div>
+
+  <!-- 完成頁 -->
+  <div class="card success-wrap" id="success-wrap">
+    <div class="icon-wrap icon-done">🎉</div>
+    <div class="title" style="color:var(--green)">收貨確認完成！</div>
+    <div class="subtitle">感謝您的惠顧，訂單已正式完結。<br>期待下次再為您服務！</div>
+    <div class="order-no">
+      <div class="order-no-label">訂單編號</div>
+      <div class="order-no-value" id="order-no-done">—</div>
+    </div>
+  </div>
+
+  <!-- 錯誤頁 -->
+  <div class="card error-wrap" id="error-wrap">
+    <div class="icon-wrap icon-error">⚠️</div>
+    <div class="title" style="color:var(--red)">連結無效</div>
+    <div class="subtitle">找不到對應的訂單資訊，<br>請聯繫業務人員確認。</div>
+  </div>
+
+</main>
+
+<footer>ADDWII · 研能科技有限公司</footer>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbx5rpoJpPEU3ddLpRFbAccJtQVTj_5QX9jL56BbT4Qy-qBvqgFQ5lwrtybvB_SbbcJl/exec';
+
+var orderNo = '';
+
+(function init(){
+  var params = new URLSearchParams(window.location.search);
+  orderNo = params.get('no') || '';
+  if(!orderNo){
+    showError();
+    return;
+  }
+  document.getElementById('order-no-display').textContent = orderNo;
+  document.getElementById('order-no-done').textContent = orderNo;
+})();
+
+async function doConfirm(){
+  var btn = document.querySelector('.btn-green');
+  btn.textContent = '處理中...';
+  btn.disabled = true;
+  try {
+    await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'confirmDelivered', '詢價單號': orderNo })
+    });
+  } catch(e) {}
+  showSuccess();
+}
+
+function notYet(){
+  document.getElementById('confirm-wrap').style.display = 'none';
+  // 顯示簡單提示
+  document.getElementById('confirm-wrap').innerHTML =
+    '<div class="icon-wrap" style="background:#fffbeb;font-size:32px;margin:0 auto 20px;">⏳</div>' +
+    '<div class="title">好的，稍後再確認</div>' +
+    '<div class="subtitle">收到貨物後，請再次點擊信件中的連結完成確認。<br>如有任何問題請聯繫業務人員。</div>';
+  document.getElementById('confirm-wrap').style.display = 'block';
+}
+
+function showSuccess(){
+  document.getElementById('confirm-wrap').style.display = 'none';
+  document.getElementById('success-wrap').style.display = 'block';
+}
+
+function showError(){
+  document.getElementById('confirm-wrap').style.display = 'none';
+  document.getElementById('error-wrap').style.display = 'block';
+}
+</script>
+</body>
+</html>
