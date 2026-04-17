@@ -545,9 +545,13 @@ function renderMyOrders(orders,account){
     :mine.map(function(o){
       var shipStatus = o['出貨狀態']||'';
       var shipTag = shipStatus==='待出貨'
-        ? '<span class="tag t-green">庫存充足，待出貨</span>'
+        ? '<span class="tag t-green">待出貨</span>'
         : shipStatus==='待生產'
-        ? '<span class="tag t-amber">庫存不足，待生產</span>'
+        ? '<span class="tag t-amber">待生產</span>'
+        : shipStatus==='已出貨'
+        ? '<span class="tag t-blue">已出貨</span>'
+        : shipStatus==='已到貨'
+        ? '<span class="tag t-green">✓ 已到貨</span>'
         : '<span class="tag t-gray">–</span>';
       return '<tr>' +
         '<td data-label="單號">'+(o['詢價單號']||'')+'</td>' +
