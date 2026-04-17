@@ -532,13 +532,9 @@ async function clientOK(no){
     :'部分品項庫存不足，將盡快安排生產並通知出貨時間。'+(shortItems.length>0?'<br>缺貨：'+shortItems.join('，'):'');
 
   var html='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:Arial,sans-serif;padding:20px">';
-  html+='<div style="text-align:center;padding:40px;max-width:480px;width:100%">';
-  html+='<div style="font-size:64px;margin-bottom:16px">'+icon+'</div>';
-  html+='<div style="font-size:22px;font-weight:700;color:'+color+';margin-bottom:8px">'+title+'</div>';
-  html+='<div style="font-size:13px;color:#6b6860;line-height:1.8;margin-bottom:24px">訂單編號：<strong>'+no+'</strong><br>'+detail+'</div>';
-  html+='<div style="background:#d4500a;border-radius:14px;padding:22px 28px;margin-top:8px;box-shadow:0 4px 16px rgba(212,80,10,0.3)">';
-  html+='<div style="font-size:24px;font-weight:900;color:#fff;letter-spacing:1px">&#128178; 確認付款後安排出貨或生產</div>';
-  html+='<div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.8">我們將於確認收款後進行層下流程<br>付款方式：<strong style="color:#fff">30/60/90 天票期</strong> 或 <strong style="color:#fff">現金/即期支票</strong></div>';
+  html+='<div style="text-align:center;padding:40px;max-width:600px;width:100%">';
+  html+='<div style="background:#d4500a;border-radius:20px;padding:48px 48px;box-shadow:0 8px 28px rgba(212,80,10,0.4)">';
+  html+='<div style="font-size:42px;font-weight:900;color:#fff;letter-spacing:2px;line-height:1.4">&#128178; 確認付款後安排出貨程序</div>';
   html+='</div>';
   html+='</div></div>';
   document.body.innerHTML=html;
