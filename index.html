@@ -139,7 +139,7 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
           <button class="btn btn-ghost" onclick="loadData()">🔄 重新整理</button>
         </div>
         <table><thead><tr>
-          <th>詢價單號</th><th>公司</th><th>品項</th><th>負責業務</th><th>狀態</th><th>時間</th>
+          <th>詢價單號</th><th>公司</th><th>品項</th><th>狀態</th><th>出貨狀態</th><th>時間</th>
         </tr></thead><tbody id="dtable"><tr><td colspan="6" class="loading">載入中...</td></tr></tbody></table>
       </div>
     </div>
@@ -798,6 +798,13 @@ async function adjustStock(){
     }
   }catch(e){}
   showToast('更新失敗，請重試');
+}
+
+function ktag(k){
+  if(!k||k==='') return '<span style="font-size:11px;color:var(--ink3)">—</span>';
+  var colors={'待出貨':'var(--blue)','待生產':'var(--amber)','已出貨':'var(--orange)','已到貨':'var(--green)'};
+  var c=colors[k]||'var(--ink2)';
+  return '<span style="font-size:11px;font-weight:600;color:'+c+'">'+k+'</span>';
 }
 
 function stag(s){
