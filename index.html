@@ -447,8 +447,8 @@ function renderDashboard(orders){
       <td data-label="單號">${o['詢價單號']||''}</td>
       <td data-label="公司">${o['公司名稱']||''}</td>
       <td data-label="品項" style="font-size:11px;max-width:180px">${o['詢價品項']||''}</td>
-      <td data-label="業務">${o['負責業務']||'未分配'}</td>
       <td data-label="狀態">${stag(o['狀態'])}</td>
+      <td data-label="出貨狀態">${ktag(o['出貨狀態'])}</td>
       <td data-label="時間" style="font-size:11px">${o['建立時間']||''}</td>
     </tr>`).join('');
 }
