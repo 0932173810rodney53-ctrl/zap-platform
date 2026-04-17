@@ -566,7 +566,7 @@ function renderMyOrders(orders,account){
 // ── 客戶確認連結 ──
 const params=new URLSearchParams(window.location.search);
 const cno=params.get('confirm');
-const dno=params.get('delivered');
+const dno=params.get('delivered')||params.get('no');
 if(cno){
   document.getElementById('login-page').style.display='none';
   document.body.innerHTML=`
