@@ -453,18 +453,20 @@ async function sendPrice(no,email,company){
     })});
   }catch(e){}
 
-  // 用 EmailJS 寄出帶按鈕的 HTML 報價信給客戶
+  // 用 Apps Script MailApp 寄報價信（免費無限制）
   try{
-    await emailjs.send('service_wdu9pis','template_vrw4sui',{
-      to_email: email,
-      client_name: company,
-      company: company,
-      order_no: no,
-      price_content: priceText,
-      ship_date: shipDate,
-      confirm_url: 'https://0932173810rodney53-ctrl.github.io/zap-platform?confirm='+no
-    });
-  }catch(e){ console.log('EmailJS error:',e); }
+    var qRes=await fetch(API,{method:'POST',body:JSON.stringify({
+      action:'sendQuote',
+      token:user.token||'',
+      '詢價單號':no,
+      '公司':company,
+      '客戶Email':email,
+      '報價內容':priceText,
+      '預計出貨日':shipDate
+    })});
+    var qData=await qRes.json();
+    if(qData.status!=='success') throw new Error(qData.message);
+  }catch(e){ console.log('sendQuote error:',e); showToast('⚠ 報價信寄出失敗，請重試'); return; }
 
   showToast('✅ 報價已送出！客戶將收到 Email 通知。');
   hidePForm(no);
