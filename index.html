@@ -308,8 +308,8 @@ function filterOrders(filterStatus){
   var rows = document.querySelectorAll('#dtable tbody tr, #dtable tr');
   if(!rows || rows.length===0) return;
   rows.forEach(function(row){
-    var statusCell = row.querySelector('td:nth-child(5)');
-    var kCell = row.querySelector('td:nth-child(6)');
+    var statusCell = row.querySelector('td:nth-child(4)');
+    var kCell = row.querySelector('td:nth-child(5)');
     if(!statusCell) return;
     var h=row.querySelector('th');
     if(h){row.style.display='';return;}
@@ -424,11 +424,9 @@ function renderDashboard(orders){
   const quoted=orders.filter(o=>o['狀態']==='已報價').length;
   const confirmed=orders.filter(o=>o['狀態']==='訂單成立').length;
 
-  // 計算已出貨/已到貨
-  var shipped=0,delivered=0;
-  if(window._allOrders){
-    window._allOrders.forEach(function(o){ if(o['出貨狀態']==='已出貨')shipped++; if(o['出貨狀態']==='已到貨')delivered++; });
-  }
+  // 計算已出貨/已到貨（從當前 orders 計算）
+  var shipped=orders.filter(function(o){return o['出貨狀態']==='已出貨';}).length;
+  var delivered=orders.filter(function(o){return o['出貨狀態']==='已到貨';}).length;
   document.getElementById('dkpi').innerHTML=`
     <div class="kpi" onclick="filterOrders('待報價')" title="點擊篩選"><div class="kl">待報價</div><div class="kv" style="color:var(--amber)">${pending}</div><div class="kn">需處理 ↗</div></div>
     <div class="kpi" onclick="filterOrders('已報價')" title="點擊篩選"><div class="kl">已報價</div><div class="kv" style="color:var(--blue)">${quoted}</div><div class="kn">等待確認 ↗</div></div>
