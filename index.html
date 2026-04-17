@@ -517,15 +517,31 @@ if(cno){
 }
 
 async function clientOK(no){
-  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'confirmOrder',詢價單號:no})}); }catch(e){}
-  document.body.innerHTML=`
-    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:var(--sans)">
-      <div style="text-align:center;padding:40px">
-        <div style="font-size:64px;margin-bottom:16px">✅</div>
-        <div style="font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px">訂單已確認成立！</div>
-        <div style="font-size:14px;color:var(--ink2);line-height:1.8">訂單編號：<strong>${no}</strong><br>感謝您的確認，我們將盡快安排生產與出貨。</div>
-      </div>
-    </div>`;
+  var resultData=null;
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'confirmOrder','詢價單號':no})});
+    resultData=await res.json();
+  }catch(e){}
+  var canShip=resultData&&resultData.canShip;
+  var shortItems=resultData&&resultData.shortItems?resultData.shortItems:[];
+  var icon=canShip?'✅':'⏳';
+  var title=canShip?'訂單成立！庫存充足':'訂單成立！需安排生產';
+  var color=canShip?'#16a34a':'#d97706';
+  var detail=canShip
+    ?'感謝您的確認，我們將盡快安排出貨並通知您。'
+    :'部分品項庫存不足，將盡快安排生產並通知出貨時間。'+(shortItems.length>0?'<br>缺貨：'+shortItems.join('，'):'');
+
+  var html='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:Arial,sans-serif;padding:20px">';
+  html+='<div style="text-align:center;padding:40px;max-width:480px;width:100%">';
+  html+='<div style="font-size:64px;margin-bottom:16px">'+icon+'</div>';
+  html+='<div style="font-size:22px;font-weight:700;color:'+color+';margin-bottom:8px">'+title+'</div>';
+  html+='<div style="font-size:13px;color:#6b6860;line-height:1.8;margin-bottom:24px">訂單編號：<strong>'+no+'</strong><br>'+detail+'</div>';
+  html+='<div style="background:#d4500a;border-radius:14px;padding:22px 28px;margin-top:8px;box-shadow:0 4px 16px rgba(212,80,10,0.3)">';
+  html+='<div style="font-size:24px;font-weight:900;color:#fff;letter-spacing:1px">&#128178; 確認付款後安排出貨或生產</div>';
+  html+='<div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:12px;line-height:1.8">我們將於確認收款後進行層下流程<br>付款方式：<strong style="color:#fff">30/60/90 天票期</strong> 或 <strong style="color:#fff">現金/即期支票</strong></div>';
+  html+='</div>';
+  html+='</div></div>';
+  document.body.innerHTML=html;
 }
 
 
