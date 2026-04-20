@@ -157,7 +157,68 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
       </div>
     </div>
 
-    <!-- B2B 提案生成頁面 -->
+    <!-- 內容行銷頁面 -->
+<div class="page" id="page-marketing">
+  <div class="panel">
+    <div class="ph">
+      <span class="pht">✍️ 內容行銷自動化 + 工單分類</span>
+      <span style="font-size:12px;color:var(--ink2)">SEO文案自動生成 · 工單分類≥88% · F1≥0.85</span>
+    </div>
+
+    <!-- SEO 文案生成 -->
+    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:12px">📝 SEO 文案自動生成</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="lfg">
+        <div class="ll">行銷場景</div>
+        <select id="mkt-scene" class="li">
+          <option value="babyRoom">嬰兒房空氣淨化</option>
+          <option value="office">辦公室空氣改善</option>
+          <option value="industrial">工業廠房淨化</option>
+        </select>
+      </div>
+      <div class="lfg">
+        <div class="ll">SEO 關鍵字（逗號分隔）</div>
+        <input id="mkt-kw" type="text" class="li" value="嬰兒房空氣清淨,PM2.5過濾,CADR認證">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="generateSEO()" style="margin-bottom:16px">🚀 生成 SEO 文案</button>
+
+    <!-- 文案結果 -->
+    <div id="mkt-seo-result" style="display:none;margin-bottom:24px">
+      <div class="krow" id="mkt-kpi" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px"></div>
+      <div style="background:var(--bg);border-radius:10px;padding:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:8px">生成文案：</div>
+        <div id="mkt-content" style="font-size:13px;line-height:1.9;white-space:pre-wrap;color:var(--ink)"></div>
+      </div>
+      <div id="mkt-kw-check" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);margin:16px 0"></div>
+
+    <!-- 工單分類 -->
+    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:12px">🏷️ 工單自動分類機器人</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="ticket-input" type="text" class="li" style="flex:1"
+        placeholder="輸入客訴內容，例如：我要退貨，產品噪音很大，要投訴消保官！"
+        onkeydown="if(event.key==='Enter')classifyTicketUI()">
+      <button class="btn btn-ghost" onclick="classifyTicketUI()">分類</button>
+      <button class="btn btn-ghost" onclick="runBatchTest()">批次測試（5筆）</button>
+    </div>
+
+    <!-- 工單結果 -->
+    <div id="ticket-results">
+      <div style="overflow-x:auto">
+      <table><thead><tr>
+        <th>工單ID</th><th>分類</th><th>信心度</th><th>F1 Score</th><th>緊急度</th><th>路由</th><th>建議回覆</th>
+      </tr></thead>
+      <tbody id="ticket-table"><tr><td colspan="7" class="loading">請輸入工單內容或執行批次測試</td></tr></tbody></table>
+      </div>
+      <div id="batch-summary" style="display:none;margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;font-size:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- B2B 提案生成頁面 -->
 <div class="page" id="page-b2b">
   <div class="panel">
     <div class="ph">
@@ -607,7 +668,8 @@ function buildNav(){
       <button class="nb" onclick="showPage('security',this);loadSecurity()">🔒 安全合規</button>
       <button class="nb" onclick="showPage('knowledge',this);loadSpecTable()">🤖 產品知識 AI</button>
       <button class="nb" onclick="showPage('feedback',this)">📊 回饋分析</button>
-      <button class="nb" onclick="showPage('b2b',this)">📄 B2B 提案</button>`;
+      <button class="nb" onclick="showPage('b2b',this)">📄 B2B 提案</button>
+      <button class="nb" onclick="showPage('marketing',this)">✍️ 內容行銷</button>`;
     document.getElementById('myorders-title').textContent='所有訂單';
   } else {
     nav.innerHTML=`
@@ -770,6 +832,87 @@ async function sendPrice(no,email,company){
   showToast('✅ 報價已送出！客戶將收到 Email 通知。');
   hidePForm(no);
   setTimeout(loadData,1000);
+}
+
+// ── 內容行銷 ──
+async function generateSEO(){
+  var scene=document.getElementById('mkt-scene').value;
+  var kwStr=document.getElementById('mkt-kw').value;
+  var keywords=kwStr.split(',').map(function(k){return k.trim();}).filter(Boolean);
+  showToast('🚀 生成文案中...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'generateSEO',scene:scene,keywords:keywords})});
+    var data=await res.json();
+    if(data.status==='success'){
+      document.getElementById('mkt-kpi').innerHTML=
+        '<div class="kpi"><div class="kl">字數</div><div class="kv">'+data.wordCount+'</div><div class="kn">字</div></div>'+
+        '<div class="kpi"><div class="kl">關鍵字植入</div><div class="kv" style="color:var(--green)">'+data.plantedCount+'/'+data.totalKeywords+'</div><div class="kn">'+(data.allKeywordsPlanted?'✅ 全數植入':'⚠ 部分植入')+'</div></div>'+
+        '<div class="kpi"><div class="kl">品牌調性</div><div class="kv" style="font-size:13px">'+data.brandTone.split('、')[0]+'</div><div class="kn">'+data.brandTone+'</div></div>'+
+        '<div class="kpi"><div class="kl">生成時間</div><div class="kv" style="color:var(--green)">'+data.generationTime+'</div><div class="kn">即時生成</div></div>';
+      document.getElementById('mkt-content').textContent=data.content;
+      var kwHtml=Object.keys(data.keywordCheck).map(function(kw){
+        var ok=data.keywordCheck[kw];
+        return '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;'+(ok?'background:#dcfce7;color:var(--green)':'background:#fee2e2;color:var(--red)')+'">'+(ok?'✅':'❌')+' '+kw+'</span>';
+      }).join('');
+      document.getElementById('mkt-kw-check').innerHTML=kwHtml;
+      document.getElementById('mkt-seo-result').style.display='block';
+      showToast('✅ 文案生成完成！關鍵字 '+data.plantedCount+'/'+data.totalKeywords+' 植入');
+    }
+  }catch(e){showToast('⚠ 生成失敗');}
+}
+
+async function classifyTicketUI(){
+  var text=document.getElementById('ticket-input').value.trim();
+  if(!text){showToast('請輸入工單內容');return;}
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'classifyTicket',text:text,id:'MANUAL-'+Date.now()})});
+    var data=await res.json();
+    if(data.status==='success') appendTicketRow(data);
+  }catch(e){showToast('⚠ 分類失敗');}
+}
+
+async function runBatchTest(){
+  var tickets=[
+    {id:'T001',text:'我上個月買的ZAP-200列印品質變差，你們再不處理我要上網公開！'},
+    {id:'T002',text:'請問ZAP-600的CADR值是多少？適合多大的房間？'},
+    {id:'T003',text:'我要退貨，產品根本就是壞的，噪音很大'},
+    {id:'T004',text:'出貨等了兩週還沒到，客服也不回應，要投訴消保官！'},
+    {id:'T005',text:'發票開錯了，金額多收了500元，請幫我更正'},
+  ];
+  showToast('🏷️ 批次分類中...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'classifyBatch',tickets:tickets})});
+    var data=await res.json();
+    if(data.status==='success'){
+      var tbody=document.getElementById('ticket-table');
+      tbody.innerHTML='';
+      data.results.forEach(function(r){ appendTicketRow(r); });
+      var s=data.summary;
+      document.getElementById('batch-summary').style.display='block';
+      document.getElementById('batch-summary').innerHTML=
+        '批次統計 | 分類準確率：<strong style="color:'+(s.meetsAccuracy?'var(--green)':'var(--red)')+'">'+s.accuracy+'%（≥88% '+(s.meetsAccuracy?'✅':'❌')+'）</strong> | '+
+        'F1 Score：<strong style="color:'+(s.meetsF1?'var(--green)':'var(--red)')+'">'+s.avgF1+'（≥0.85 '+(s.meetsF1?'✅':'❌')+'）</strong> | '+
+        '處理時間：<strong style="color:var(--green)">'+s.processTimeMs+'ms</strong> | '+
+        '高緊急度：<strong style="color:var(--red)">'+s.highUrgency+'筆</strong>';
+      showToast('✅ 批次分類完成！準確率 '+s.accuracy+'%，F1='+s.avgF1);
+    }
+  }catch(e){showToast('⚠ 分類失敗');}
+}
+
+function appendTicketRow(r){
+  var uc=r.urgency==='高'?'var(--red)':r.urgency==='中'?'var(--amber)':'var(--green)';
+  var tbody=document.getElementById('ticket-table');
+  if(tbody.querySelector('.loading')) tbody.innerHTML='';
+  var row=document.createElement('tr');
+  row.innerHTML=
+    '<td style="font-family:var(--mono);font-size:11px">'+r.ticketId+'</td>'+
+    '<td><strong>'+r.category+'</strong></td>'+
+    '<td style="font-family:var(--mono)">'+r.confidence+'%</td>'+
+    '<td style="font-family:var(--mono)">'+r.f1Score+'</td>'+
+    '<td style="color:'+uc+';font-weight:600">'+r.urgency+'</td>'+
+    '<td style="font-size:11px">'+r.route.join('、')+'</td>'+
+    '<td style="font-size:11px;max-width:180px">'+r.replyTemplate.substring(0,40)+'...</td>';
+  tbody.insertBefore(row, tbody.firstChild);
 }
 
 // ── B2B 提案生成 ──
