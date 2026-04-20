@@ -471,12 +471,15 @@ function buildNav(){
       <button class="nb active" onclick="showPage('dashboard',this)">總覽儀表板</button>
       <button class="nb" onclick="showPage('pending',this)">待報價 <span class="nbadge" id="nbp">0</span></button>
       <button class="nb" onclick="showPage('myorders',this)">所有訂單</button>
-      <button class="nb" onclick="showPage('stock',this)">庫存管理</button>`;
+      <button class="nb" onclick="showPage('stock',this)">庫存管理</button>
+      <button class="nb" onclick="showPage('security',this);loadSecurity()">🔒 安全合規</button>
+      <button class="nb" onclick="showPage('knowledge',this);loadSpecTable()">🤖 產品知識 AI</button>`;
     document.getElementById('myorders-title').textContent='所有訂單';
   } else {
     nav.innerHTML=`
       <button class="nb active" onclick="showPage('pending',this)">待報價 <span class="nbadge" id="nbp">0</span></button>
-      <button class="nb" onclick="showPage('myorders',this)">我的訂單</button>`;
+      <button class="nb" onclick="showPage('myorders',this)">我的訂單</button>
+      <button class="nb" onclick="showPage('knowledge',this);loadSpecTable()">🤖 產品知識 AI</button>`;
     showPage('pending',nav.querySelector('.nb'));
   }
 }
