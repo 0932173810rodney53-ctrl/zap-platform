@@ -157,7 +157,71 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
       </div>
     </div>
 
-    <!-- 產品知識 AI 頁面 -->
+    <!-- 回饋分析 Dashboard -->
+<div class="page" id="page-feedback">
+  <div class="panel">
+    <div class="ph">
+      <span class="pht">📊 客戶回饋自動分析 Dashboard</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="runFeedbackAnalysis()">🔄 執行今日分析</button>
+        <button class="btn btn-ghost" onclick="testSingleFeedback()">🧪 單筆測試</button>
+      </div>
+    </div>
+
+    <!-- 快速輸入測試 -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input id="fb-input" type="text" class="li" placeholder="輸入客戶回饋文字（如：ZAP-400很好用，空氣變乾淨了！）" style="flex:1"
+        onkeydown="if(event.key==='Enter')testSingleFeedback()">
+      <button class="btn btn-ghost" onclick="testSingleFeedback()">分析</button>
+    </div>
+
+    <!-- KPI 統計 -->
+    <div class="krow" id="fb-kpi" style="margin-bottom:20px;grid-template-columns:repeat(5,1fr)">
+      <div class="kpi"><div class="kl">總筆數</div><div class="kv" id="fb-total">—</div><div class="kn">筆回饋</div></div>
+      <div class="kpi"><div class="kl">正面</div><div class="kv" id="fb-pos" style="color:var(--green)">—</div><div class="kn">筆</div></div>
+      <div class="kpi"><div class="kl">負面</div><div class="kv" id="fb-neg" style="color:var(--red)">—</div><div class="kn">筆</div></div>
+      <div class="kpi"><div class="kl">緊急</div><div class="kv" id="fb-urgent" style="color:var(--amber)">—</div><div class="kn">需立即處理</div></div>
+      <div class="kpi"><div class="kl">準確率</div><div class="kv" id="fb-acc" style="color:var(--blue)">—</div><div class="kn">情感分析</div></div>
+    </div>
+
+    <!-- 分析結果 -->
+    <div id="fb-results" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div style="background:var(--bg);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px">😡 Top 抱怨主題</div>
+          <div id="fb-complaints" style="font-size:13px;line-height:1.8"></div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">😊 Top 讚美主題</div>
+          <div id="fb-praise" style="font-size:13px;line-height:1.8"></div>
+        </div>
+      </div>
+
+      <!-- 新興風險 -->
+      <div id="fb-risks-wrap" style="display:none;background:#fef3c7;border:1px solid #f59e0b;border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:6px">⚠️ 新興風險預警</div>
+        <div id="fb-risks" style="font-size:13px;color:#78350f;line-height:1.8"></div>
+      </div>
+
+      <!-- 改善優先度 -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">📋 改善優先度排序</div>
+        <div id="fb-priorities" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <!-- 詳細分析表格 -->
+      <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">📄 個案詳細分析</div>
+      <div style="overflow-x:auto">
+      <table><thead><tr>
+        <th>#</th><th>來源</th><th>情感</th><th>主題</th><th>緊急度</th><th>建議回覆</th>
+      </tr></thead>
+      <tbody id="fb-detail-table"><tr><td colspan="6" class="loading">點擊「執行今日分析」開始</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 產品知識 AI 頁面 -->
 <div class="page" id="page-knowledge">
   <div class="panel">
     <div class="ph">
@@ -473,7 +537,8 @@ function buildNav(){
       <button class="nb" onclick="showPage('myorders',this)">所有訂單</button>
       <button class="nb" onclick="showPage('stock',this)">庫存管理</button>
       <button class="nb" onclick="showPage('security',this);loadSecurity()">🔒 安全合規</button>
-      <button class="nb" onclick="showPage('knowledge',this);loadSpecTable()">🤖 產品知識 AI</button>`;
+      <button class="nb" onclick="showPage('knowledge',this);loadSpecTable()">🤖 產品知識 AI</button>
+      <button class="nb" onclick="showPage('feedback',this)">📊 回饋分析</button>`;
     document.getElementById('myorders-title').textContent='所有訂單';
   } else {
     nav.innerHTML=`
@@ -636,6 +701,91 @@ async function sendPrice(no,email,company){
   showToast('✅ 報價已送出！客戶將收到 Email 通知。');
   hidePForm(no);
   setTimeout(loadData,1000);
+}
+
+// ── 回饋分析 ──
+async function runFeedbackAnalysis(){
+  showToast('📊 AI 分析中...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'generateDailyReport'})});
+    var data=await res.json();
+    if(data.status==='success') renderFeedbackDashboard(data);
+    else showToast('⚠ 分析失敗');
+  }catch(e){showToast('⚠ 連線失敗');}
+}
+
+async function testSingleFeedback(){
+  var text=document.getElementById('fb-input').value.trim();
+  if(!text){showToast('請輸入回饋文字');return;}
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'analyzeFeedback',text:text,source:'手動測試'})});
+    var data=await res.json();
+    if(data.status==='success'){
+      var sentColor=data.sentiment==='正面'?'var(--green)':data.sentiment==='負面'?'var(--red)':'var(--ink2)';
+      var urgColor=data.urgency==='高'?'var(--red)':data.urgency==='中'?'var(--amber)':'var(--green)';
+      showToast('情感：'+data.sentiment+' | 主題：'+data.topics[0]+' | 緊急度：'+data.urgency);
+      // 加入詳細結果
+      var wrap=document.getElementById('fb-results');
+      wrap.style.display='block';
+      var tbody=document.getElementById('fb-detail-table');
+      var row='<tr>'+
+        '<td>-</td>'+
+        '<td>手動測試</td>'+
+        '<td style="color:'+sentColor+';font-weight:600">'+data.sentiment+'<br><span style="font-size:10px;color:var(--ink3)">信心'+data.confidence+'%</span></td>'+
+        '<td style="font-size:11px">'+data.topics.join('、')+'</td>'+
+        '<td style="color:'+urgColor+';font-weight:600">'+data.urgency+'</td>'+
+        '<td style="font-size:11px;max-width:200px">'+data.replyTemplate.substring(0,50)+'...</td>'+
+      '</tr>';
+      tbody.innerHTML=row+tbody.innerHTML;
+    }
+  }catch(e){showToast('⚠ 連線失敗');}
+}
+
+function renderFeedbackDashboard(data){
+  var s=data.summary;
+  document.getElementById('fb-total').textContent=s.total;
+  document.getElementById('fb-pos').textContent=s.positive;
+  document.getElementById('fb-neg').textContent=s.negative;
+  document.getElementById('fb-urgent').textContent=s.urgent;
+  document.getElementById('fb-acc').textContent=s.accuracyRate+'%';
+
+  document.getElementById('fb-complaints').innerHTML=(data.topComplaints||[]).map(function(t,i){
+    return '<span style="display:inline-block;background:#fee2e2;color:var(--red);padding:2px 8px;border-radius:4px;font-size:12px;margin:2px">'+(i+1)+'. '+t+'</span>';
+  }).join(' ');
+  document.getElementById('fb-praise').innerHTML=(data.topPraise||[]).map(function(t,i){
+    return '<span style="display:inline-block;background:#dcfce7;color:var(--green);padding:2px 8px;border-radius:4px;font-size:12px;margin:2px">'+(i+1)+'. '+t+'</span>';
+  }).join(' ');
+
+  if(data.risks&&data.risks.length>0){
+    document.getElementById('fb-risks-wrap').style.display='block';
+    document.getElementById('fb-risks').innerHTML=data.risks.map(function(r){return '• '+r;}).join('<br>');
+  }
+
+  document.getElementById('fb-priorities').innerHTML=(data.priorities||[]).slice(0,5).map(function(p,i){
+    var w=Math.min(100,p.count*20+20);
+    return '<div style="display:flex;align-items:center;gap:10px">'+
+      '<span style="width:80px;font-size:12px;color:var(--ink2)">'+p.topic+'</span>'+
+      '<div style="flex:1;background:var(--border);border-radius:4px;height:8px">'+
+      '<div style="width:'+w+'%;background:var(--orange);border-radius:4px;height:8px"></div></div>'+
+      '<span style="font-size:12px;font-family:var(--mono);color:var(--ink2)">'+p.count+'筆</span></div>';
+  }).join('');
+
+  var tbody=document.getElementById('fb-detail-table');
+  tbody.innerHTML=(data.results||[]).map(function(r){
+    var sc=r.sentiment==='正面'?'var(--green)':r.sentiment==='負面'?'var(--red)':'var(--ink2)';
+    var uc=r.urgency==='高'?'var(--red)':r.urgency==='中'?'var(--amber)':'var(--green)';
+    return '<tr>'+
+      '<td style="font-family:var(--mono);font-size:11px">'+r.index+'</td>'+
+      '<td><span style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px">'+r.source+'</span></td>'+
+      '<td style="color:'+sc+';font-weight:600">'+r.sentiment+'<br><span style="font-size:10px;color:var(--ink3)">信心'+r.confidence+'%</span></td>'+
+      '<td style="font-size:11px">'+r.topics.join('、')+'</td>'+
+      '<td style="color:'+uc+';font-weight:600">'+r.urgency+'</td>'+
+      '<td style="font-size:11px;max-width:200px">'+r.replyTemplate.substring(0,50)+'...</td>'+
+    '</tr>';
+  }).join('');
+
+  document.getElementById('fb-results').style.display='block';
+  showToast('✅ 分析完成！共 '+s.total+' 筆，準確率 '+s.accuracyRate+'%');
 }
 
 // ── 產品知識 AI ──
