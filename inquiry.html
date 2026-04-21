@@ -82,7 +82,30 @@ footer{text-align:center;padding:20px;font-size:12px;color:var(--ink3);}
         <div class="selected-items" id="selected-items"></div>
       </div>
     </div>
-    <div class="card">
+    <!-- 幣別卡片 -->
+  <div class="card">
+      <div class="card-header">
+        <div class="card-title">計價幣別</div>
+        <div class="card-sub">本公司報價一律以新台幣（NTD）計算</div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:16px;padding:6px 0">
+          <div style="display:flex;align-items:center;gap:10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:12px 20px">
+            <span style="font-size:22px">🇹🇼</span>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:#1E40AF">新台幣（NTD）</div>
+              <div style="font-size:12px;color:#3B82F6">New Taiwan Dollar</div>
+            </div>
+            <span style="background:#DBEAFE;color:#1D4ED8;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;margin-left:6px">預設幣別</span>
+          </div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.8">
+            如需外幣報價（USD / JPY / EUR）<br>請在備註欄說明，業務另行報價
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div class="card">
       <div class="card-header"><div class="card-title">其他需求</div></div>
       <div class="card-body">
         <div class="fg" style="margin-bottom:0">
@@ -96,7 +119,7 @@ footer{text-align:center;padding:20px;font-size:12px;color:var(--ink3);}
   <div class="success" id="success-page">
     <div class="success-icon">✅</div>
     <div class="success-title">詢價已送出！</div>
-    <div class="success-text">感謝您的詢價<br>業務將在 <strong>2 小時內</strong> 寄送正式報價單至您的信箱<br>如有緊急需求請致電：<strong>02-XXXX-XXXX</strong></div>
+    <div class="success-text">感謝您的詢價<br>業務將在 <strong>2 小時內</strong> 寄送正式報價單至您的信箱<br>報價幣別：<strong style="color:#1E40AF">新台幣（NTD）</strong><br>如有緊急需求請致電：<strong>0932-173-810</strong></div>
     <div class="success-no" id="inquiry-no"></div>
     <br><br>
     <button class="btn btn-ghost" onclick="location.reload()" style="max-width:200px;margin:0 auto">再次詢價</button>
@@ -123,7 +146,8 @@ function renderSelected(){
       <div class="sel-sku">${sku}</div>
       <input type="number" min="1" value="${qty}" placeholder="數量（台）"
         oninput="selected['${sku}']=parseInt(this.value)||1">
-    </div>`).join('');
+      <span style="font-size:11px;color:#2563EB;background:#EFF6FF;padding:2px 8px;border-radius:4px;white-space:nowrap">台幣報價</span>
+    </div>`).join('')+`<div style="font-size:11px;color:#6B7280;margin-top:8px;padding:6px 8px;background:#F9FAFB;border-radius:6px">💱 報價幣別：<strong style="color:#1E40AF">新台幣（NTD）</strong>，如需外幣請在備註說明</div>`;
 }
 
 async function submitInquiry(){
@@ -138,6 +162,7 @@ async function submitInquiry(){
   if(!email){alert('請填寫 Email');return;}
   if(!Object.keys(selected).length){alert('請至少選擇一個型號');return;}
 
+  const currency='NTD（新台幣）';
   const itemText=Object.entries(selected).map(([sku,qty])=>`${sku} x ${qty}台`).join('、');
   const no='INQ-'+Date.now().toString().slice(-6);
 
@@ -158,6 +183,7 @@ async function submitInquiry(){
         Email:email,
         電話:phone||'未填',
         詢價品項:itemText,
+        計價幣別:currency,
         備註:note||'無'
       })
     });
