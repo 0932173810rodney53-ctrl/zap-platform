@@ -892,12 +892,19 @@ function renderPending(pending){
 function showPForm(no,items,email,company){
   document.getElementById('pf-'+no).classList.add('show');
   const skus=items.split('、').map(s=>s.trim());
-  document.getElementById('pi-'+no).innerHTML=skus.map(s=>`
-    <div class="pitem">
+  document.getElementById('pi-'+no).innerHTML=skus.map(s=>{
+    // 解析數量：ZAP-400 x 2台 或 ZAP-400x2台
+    const qMatch=s.match(/[xX×]\s*(\d+)/);
+    const qty=qMatch?parseInt(qMatch[1]):1;
+    const skuKey=s.replace(/[\s\-]/g,'');
+    const skuName=s.split(/[xX×]/)[0].trim();
+    return `<div class="pitem">
       <div class="psku">${s}</div>
-      <input type="number" placeholder="單價（元/台）" id="pp-${no}-${s.replace(/[\s\-]/g,'')}"
+      <input type="number" placeholder="單價（元/台）" id="pp-${no}-${skuKey}"
+        data-qty="${qty}"
         style="padding:8px 10px;font-size:13px;background:var(--white);border:1px solid var(--border);border-radius:6px;width:100%;outline:none;">
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function hidePForm(no){ document.getElementById('pf-'+no).classList.remove('show'); }
@@ -905,11 +912,14 @@ function hidePForm(no){ document.getElementById('pf-'+no).classList.remove('show
 async function sendPrice(no,email,company){
   const pf=document.getElementById('pf-'+no);
   const inputs=pf.querySelectorAll('input[type="number"]');
-  let priceText=''; let ok=true;
+  let priceText=''; let ok=true; let totalAmount=0;
   inputs.forEach(inp=>{
     if(!inp.value){ok=false;return;}
-    const sku=inp.placeholder;
-    priceText+=inp.id.replace(`pp-${no}-`,'')+': $'+parseFloat(inp.value).toLocaleString()+'/台　';
+    const skuKey=inp.id.replace(`pp-${no}-`,'');
+    const unitPrice=parseFloat(inp.value)||0;
+    const qty=parseInt(inp.dataset.qty||'1')||1;
+    priceText+=skuKey+': NT$'+unitPrice.toLocaleString()+'/台　';
+    totalAmount+=unitPrice*qty;
   });
   if(!ok){showToast('⚠ 請填寫所有品項的單價');return;}
 
@@ -934,6 +944,7 @@ async function sendPrice(no,email,company){
       '公司':company,
       '客戶Email':email,
       '報價內容':priceText,
+      '總金額':totalAmount,
       '預計出貨日':shipDate
     })});
     var qData=await qRes.json();
