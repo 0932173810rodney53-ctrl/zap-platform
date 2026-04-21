@@ -144,10 +144,16 @@ var orderNo = '';
   orderNo = params.get('confirm') || params.get('no') || '';
 
   if(!orderNo){
-    show('error-state');
+    // 沒有帶參數，顯示手動輸入框
+    show('input-state');
     return;
   }
+  loadOrder(orderNo);
+})();
 
+function loadOrder(no) {
+  orderNo = no;
+  show('loading-state');
   // 從 API 取得訂單資訊
   fetch(API + '?action=getOrderInfo&no=' + encodeURIComponent(orderNo))
     .then(function(r){ return r.json(); })
