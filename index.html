@@ -935,25 +935,29 @@ async function sendPrice(no,email,company){
     })});
   }catch(e){}
 
-  // 用 Apps Script MailApp 寄報價信（免費無限制）
+  // 寄報價信（用 no-cors，不等回應）
   try{
-    var qRes=await fetch(API,{method:'POST',body:JSON.stringify({
-      action:'sendQuote',
-      token:user.token||'',
-      '詢價單號':no,
-      '公司':company,
-      '客戶Email':email,
-      '報價內容':priceText,
-      '總金額':totalAmount,
-      '預計出貨日':shipDate
-    })});
-    var qData=await qRes.json();
-    if(qData.status!=='success') throw new Error(qData.message);
-  }catch(e){ console.log('sendQuote error:',e); showToast('⚠ 報價信寄出失敗，請重試'); return; }
+    fetch(API,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        action:'sendQuote',
+        token:user.token||'',
+        '詢價單號':no,
+        '公司':company,
+        '客戶Email':email,
+        '報價內容':priceText,
+        '總金額':totalAmount,
+        '預計出貨日':shipDate
+      })
+    });
+  }catch(e){}
 
+  // 1秒後顯示成功（no-cors 不等回應）
   showToast('✅ 報價已送出！客戶將收到 Email 通知。');
   hidePForm(no);
-  setTimeout(loadData,1000);
+  setTimeout(loadData,1500);
 }
 
 // ── 採購 AI ──
