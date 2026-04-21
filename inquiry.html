@@ -162,6 +162,59 @@ async function submitInquiry(){
   if(!email){alert('請填寫 Email');return;}
   if(!Object.keys(selected).length){alert('請至少選擇一個型號');return;}
 
+  // ── 前端庫存查詢（送出前檢查）──
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;
+  btn.textContent='檢查庫存中...';
+
+  try {
+    // 呼叫 Apps Script 查詢庫存
+    const stockRes = await fetch(GAS_URL, {
+      method:'POST',
+      mode:'cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action:'checkStockByItems',
+        items: Object.entries(selected).map(([sku,qty])=>({sku,qty}))
+      })
+    });
+    const stockData = await stockRes.json();
+
+    if(stockData.status==='success' && !stockData.allEnough){
+      // 庫存不足 → 顯示警告，不能送出
+      const warnings = stockData.data
+        .filter(r=>!r.enough)
+        .map(r=>`• ${r.sku}：需要 ${r.need} 台，目前庫存只有 ${r.available} 台`)
+        .join('
+');
+
+      btn.disabled=false;
+      btn.textContent='送出詢價';
+
+      const proceed = confirm(
+        '⚠️ 以下品項庫存不足：
+
+' + warnings +
+        '
+
+庫存不足的品項需要另行採購，' +
+        '可能需要 3-4 週才能出貨。
+
+' +
+        '是否仍要繼續送出詢價？
+（送出後業務會與您確認交期）'
+      );
+      if(!proceed) return;
+    } else {
+      btn.disabled=false;
+      btn.textContent='送出詢價';
+    }
+  } catch(e) {
+    // 查詢失敗（CORS 或網路問題）→ 直接繼續，後端再處理
+    btn.disabled=false;
+    btn.textContent='送出詢價';
+  }
+
   const currency='NTD（新台幣）';
   const itemText=Object.entries(selected).map(([sku,qty])=>`${sku} x ${qty}台`).join('、');
   const _d=new Date();
