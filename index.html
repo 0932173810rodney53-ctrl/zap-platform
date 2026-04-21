@@ -1914,7 +1914,11 @@ function ktag(k){
 }
 
 function stag(s){
-  const m={'待報價':'t-orange','已報價':'t-blue','訂單成立':'t-green','已取消':'t-gray'};
+  const m={
+    '待報價':'t-orange','已報價':'t-blue','訂單成立':'t-green',
+    '已取消':'t-gray','庫存不足':'t-red','待生產':'t-red',
+    '待出貨':'t-green','已出貨':'t-blue'
+  };
   return `<span class="tag ${m[s]||'t-gray'}">${s||'–'}</span>`;
 }
 
