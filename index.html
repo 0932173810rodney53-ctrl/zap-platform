@@ -164,6 +164,9 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
       <span class="pht">🛒 採購 AI Agent（第一階段虛擬測試架構）</span>
       <div style="display:flex;gap:8px">
         <button class="btn btn-ghost" style="font-size:12px" onclick="initProcurement()">⚙️ 初始化 Sheets</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="initSupplierSheet()">🏭 建立供應商Sheet</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="autoCreatePR()">📋 待生產→自動建PR</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="showInboundModal()">📦 入庫登記</button>
         <button class="btn btn-ghost" style="font-size:12px" onclick="scanGmailReplies()">📬 掃描供應商回信</button>
         <button class="btn btn-ghost" style="font-size:12px" onclick="sendMonthlyKPI()">📧 寄 KPI 月報</button>
         <button class="btn btn-primary" onclick="runClosedLoopTest()">🔄 執行閉環測試</button>
@@ -231,6 +234,29 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
       <button class="btn btn-ghost" style="font-size:12px" onclick="genKPI()">產出本月 KPI</button>
       <button class="btn btn-ghost" style="font-size:12px" onclick="runReflect()">執行 Reflect 閉環學習</button>
     </div>
+    <!-- 入庫彈窗 -->
+    <div id="inbound-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+      <div style="background:var(--white);border-radius:12px;padding:24px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+        <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--ink)">📦 入庫登記</div>
+        <div class="fg"><label class="fl">料號</label>
+          <select id="ib-material" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px">
+            <option value="M001">M001 - HEPA H13 濾網（ZAP-400用）</option>
+            <option value="M002">M002 - HEPA H14 濾網（ZAP-1200用）</option>
+            <option value="M003">M003 - 活性碳濾網</option>
+            <option value="M004">M004 - 前置預濾網</option>
+            <option value="M005">M005 - 馬達元件</option>
+          </select></div>
+        <div class="fg"><label class="fl">入庫數量</label>
+          <input type="number" id="ib-qty" min="1" value="10" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px"></div>
+        <div class="fg"><label class="fl">供應商名稱</label>
+          <input type="text" id="ib-supplier" value="國際空氣科學" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" style="flex:1" onclick="submitInbound()">確認入庫</button>
+          <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('inbound-modal').style.display='none'">取消</button>
+        </div>
+      </div>
+    </div>
+
     <div id="kpi-summary" style="display:none;padding:12px;background:var(--bg);border-radius:8px;margin-bottom:12px;font-size:12px"></div>
     <div style="overflow-x:auto">
     <table><thead><tr>
@@ -1146,6 +1172,47 @@ function renderKPITable(rows){
       '<td><span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:2px 6px;border-radius:4px">'+r['上鏈狀態']+'</span></td>'+
     '</tr>';
   }).join('');
+}
+
+async function initSupplierSheet(){
+  showToast('🏭 建立供應商 Sheet...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'initSupplierSheet'})});
+    var data=await res.json();
+    if(data.status==='success') showToast('✅ 供應商 Sheet 建立完成！請更新真實 Email');
+    else showToast('⚠ '+data.message);
+  }catch(e){showToast('⚠ 建立失敗');}
+}
+
+async function autoCreatePR(){
+  showToast('📋 掃描待生產訂單→自動建採購PR...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'autoCreatePR'})});
+    var data=await res.json();
+    if(data.status==='success'){ showToast('✅ '+data.message); loadProcurement(); }
+    else showToast('⚠ '+data.message);
+  }catch(e){showToast('⚠ 操作失敗');}
+}
+
+function showInboundModal(){
+  document.getElementById('inbound-modal').style.display='flex';
+}
+
+async function submitInbound(){
+  var materialNo=document.getElementById('ib-material').value;
+  var qty=parseInt(document.getElementById('ib-qty').value)||0;
+  var supplier=document.getElementById('ib-supplier').value;
+  if(!qty||qty<1){showToast('請填入有效數量');return;}
+  showToast('📦 入庫登記中...');
+  document.getElementById('inbound-modal').style.display='none';
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'stockInbound',materialNo:materialNo,qty:qty,supplierName:supplier})});
+    var data=await res.json();
+    if(data.status==='success'){
+      showToast('✅ 入庫完成！新庫存:'+data.newQty+' 訂單轉換:'+data.ordersConverted+'筆');
+      loadProcurement();
+    } else showToast('⚠ '+data.message);
+  }catch(e){showToast('⚠ 入庫失敗');}
 }
 
 async function runReflect(){
