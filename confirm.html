@@ -154,37 +154,12 @@ var orderNo = '';
 function loadOrder(no) {
   orderNo = no.trim();
   if(!orderNo){ alert('請輸入詢價單號'); return; }
-  show('loading-state');
-  // 用 POST 方式查詢（避免 CORS 問題）
-  fetch(API, {
-    method:'POST',
-    mode:'cors',
-    headers:{'Content-Type':'text/plain'},
-    body: JSON.stringify({ action:'getOrderInfo', no: orderNo })
-  })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(d.status === 'success' && d.data){
-        document.getElementById('disp-no').textContent = orderNo;
-        if(d.data.price){
-          document.getElementById('disp-price').textContent = d.data.price;
-          document.getElementById('box-price').style.display = 'block';
-        }
-        if(d.data.shipDate){
-          document.getElementById('disp-shipdate').textContent = d.data.shipDate;
-          document.getElementById('box-shipdate').style.display = 'block';
-        }
-      } else {
-        // API 沒有 getOrderInfo，直接顯示單號
-        document.getElementById('disp-no').textContent = orderNo;
-      }
-      show('confirm-state');
-    })
-    .catch(function(){
-      // 即使 API 失敗也顯示確認頁（只有單號）
-      document.getElementById('disp-no').textContent = orderNo;
-      show('confirm-state');
-    });
+
+  // 直接顯示確認頁（不查詢 API，避免 CORS 問題）
+  // 詳細資訊客戶可從報價信中確認
+  document.getElementById('disp-no').textContent = orderNo;
+  document.getElementById('box-price').style.display = 'none';
+  show('confirm-state');
 })();
 
 async function doConfirm(){
