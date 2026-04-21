@@ -115,8 +115,15 @@ function doQuery() {
   var d = window._confirmData || {};
   var infoHtml = '';
   if(d.items) infoHtml += '<div class="info-row"><span class="info-label">採購品項</span><span class="info-value">'+d.items+'</span></div>';
-  if(d.price) infoHtml += '<div class="info-row"><span class="info-label">報價金額</span><span class="info-value" style="color:#16A34A;font-size:16px">NT$'+Number(d.price).toLocaleString()+'</span></div>';
-  if(d.date)  infoHtml += '<div class="info-row"><span class="info-label">預計出貨日</span><span class="info-value">'+d.date+'</span></div>';
+  if(d.price) {
+    var priceNum = Number(String(d.price).replace(/[^0-9.]/g,''));
+    var priceStr = isNaN(priceNum) || priceNum===0 ? d.price : 'NT$'+priceNum.toLocaleString();
+    infoHtml += '<div class="info-row"><span class="info-label">報價金額</span><span class="info-value" style="color:#16A34A;font-size:16px">'+priceStr+'</span></div>';
+  }
+  if(d.date) {
+    var dateStr = d.date.replace(/-/g,'/');
+    infoHtml += '<div class="info-row"><span class="info-label">預計出貨日</span><span class="info-value">'+dateStr+'</span></div>';
+  }
   infoHtml += '<div class="info-row"><span class="info-label">計價幣別</span><span class="info-value">新台幣（NTD）</span></div>';
   document.getElementById('confirm-info').innerHTML = infoHtml;
 
