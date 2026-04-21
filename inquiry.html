@@ -164,7 +164,10 @@ async function submitInquiry(){
 
   const currency='NTD（新台幣）';
   const itemText=Object.entries(selected).map(([sku,qty])=>`${sku} x ${qty}台`).join('、');
-  const no='INQ-'+Date.now().toString().slice(-6);
+  const _d=new Date();
+  const _ds=_d.getFullYear()+('0'+(_d.getMonth()+1)).slice(-2)+('0'+_d.getDate()).slice(-2);
+  const _sq=String(Math.floor(Date.now()/1000)%1000).padStart(3,'0');
+  const no='INQ-'+_ds+'-'+_sq;
 
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='送出中...';
