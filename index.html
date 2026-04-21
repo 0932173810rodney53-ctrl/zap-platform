@@ -157,7 +157,91 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
       </div>
     </div>
 
-    <!-- 內容行銷頁面 -->
+    <!-- 採購 AI 頁面（第一階段虛擬架構） -->
+<div class="page" id="page-procurement">
+  <div class="panel">
+    <div class="ph">
+      <span class="pht">🛒 採購 AI Agent（第一階段虛擬測試架構）</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" style="font-size:12px" onclick="initProcurement()">⚙️ 初始化 Sheets</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="scanGmailReplies()">📬 掃描供應商回信</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="sendMonthlyKPI()">📧 寄 KPI 月報</button>
+        <button class="btn btn-primary" onclick="runClosedLoopTest()">🔄 執行閉環測試</button>
+      </div>
+    </div>
+
+    <!-- 步驟導覽 -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;padding:12px;background:var(--bg);border-radius:10px">
+      <div style="flex:1;text-align:center;padding:8px;background:var(--white);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:18px">📋</div>
+        <div style="font-size:11px;font-weight:600;color:var(--orange)">Step 1</div>
+        <div style="font-size:11px;color:var(--ink2)">PR 建立</div>
+      </div>
+      <div style="color:var(--ink3);align-self:center">→</div>
+      <div style="flex:1;text-align:center;padding:8px;background:var(--white);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:18px">🤖</div>
+        <div style="font-size:11px;font-weight:600;color:var(--orange)">Step 2</div>
+        <div style="font-size:11px;color:var(--ink2)">AI 比價建議</div>
+      </div>
+      <div style="color:var(--ink3);align-self:center">→</div>
+      <div style="flex:1;text-align:center;padding:8px;background:var(--white);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:18px">✅</div>
+        <div style="font-size:11px;font-weight:600;color:var(--orange)">Step 3</div>
+        <div style="font-size:11px;color:var(--ink2)">Change Set 審核</div>
+      </div>
+      <div style="color:var(--ink3);align-self:center">→</div>
+      <div style="flex:1;text-align:center;padding:8px;background:var(--white);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:18px">📊</div>
+        <div style="font-size:11px;font-weight:600;color:var(--orange)">Step 4</div>
+        <div style="font-size:11px;color:var(--ink2)">KPI 計算</div>
+      </div>
+      <div style="color:var(--ink3);align-self:center">→</div>
+      <div style="flex:1;text-align:center;padding:8px;background:var(--white);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:18px">🔁</div>
+        <div style="font-size:11px;font-weight:600;color:var(--green)">Step 5</div>
+        <div style="font-size:11px;color:var(--ink2)">Reflect 閉環</div>
+      </div>
+    </div>
+
+    <!-- PR 列表 -->
+    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">📋 採購請購單（PR）</div>
+    <div style="overflow-x:auto;margin-bottom:20px">
+    <table><thead><tr>
+      <th>PR單號</th><th>料號</th><th>品名</th><th>數量</th><th>目標單價</th><th>需求日期</th><th>狀態</th><th>操作</th>
+    </tr></thead>
+    <tbody id="pr-table"><tr><td colspan="8" class="loading">點擊「初始化 Sheets」載入</td></tr></tbody></table>
+    </div>
+
+    <!-- AI 採購建議（Change Set）-->
+    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">🤖 AI 採購建議（Change Set）</div>
+    <div id="cs-detail" style="display:none;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:16px">
+      <div id="cs-content"></div>
+      <div style="display:flex;gap:8px;margin-top:12px" id="cs-actions"></div>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:20px">
+    <table><thead><tr>
+      <th>ChangeSet ID</th><th>PR單號</th><th>推薦供應商</th><th>建議單價</th><th>節省比例</th><th>交期(天)</th><th>風險</th><th>狀態</th>
+    </tr></thead>
+    <tbody id="cs-table"><tr><td colspan="8" class="loading">待生成</td></tr></tbody></table>
+    </div>
+
+    <!-- KPI 採購績效 -->
+    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px">📊 採購績效 KPI（閉環）</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="btn btn-ghost" style="font-size:12px" onclick="genKPI()">產出本月 KPI</button>
+      <button class="btn btn-ghost" style="font-size:12px" onclick="runReflect()">執行 Reflect 閉環學習</button>
+    </div>
+    <div id="kpi-summary" style="display:none;padding:12px;background:var(--bg);border-radius:8px;margin-bottom:12px;font-size:12px"></div>
+    <div style="overflow-x:auto">
+    <table><thead><tr>
+      <th>期間</th><th>供應商</th><th>價格達成率</th><th>交期達成率</th><th>品質合格率</th><th>AI採納率</th><th>KPI分數</th><th>上鏈狀態</th>
+    </tr></thead>
+    <tbody id="kpi-table"><tr><td colspan="8" class="loading">待計算</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- 內容行銷頁面 -->
 <div class="page" id="page-marketing">
   <div class="panel">
     <div class="ph">
@@ -669,7 +753,8 @@ function buildNav(){
       <button class="nb" onclick="showPage('knowledge',this);loadSpecTable()">🤖 產品知識 AI</button>
       <button class="nb" onclick="showPage('feedback',this)">📊 回饋分析</button>
       <button class="nb" onclick="showPage('b2b',this)">📄 B2B 提案</button>
-      <button class="nb" onclick="showPage('marketing',this)">✍️ 內容行銷</button>`;
+      <button class="nb" onclick="showPage('marketing',this)">✍️ 內容行銷</button>
+      <button class="nb" onclick="showPage('procurement',this);loadProcurement()">🛒 採購 AI</button>`;
     document.getElementById('myorders-title').textContent='所有訂單';
   } else {
     nav.innerHTML=`
@@ -832,6 +917,260 @@ async function sendPrice(no,email,company){
   showToast('✅ 報價已送出！客戶將收到 Email 通知。');
   hidePForm(no);
   setTimeout(loadData,1000);
+}
+
+// ── 採購 AI ──
+var _currentCS = null;
+
+async function initProcurement(){
+  showToast('⚙️ 初始化採購 Sheets...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'initProcurement'})});
+    var data=await res.json();
+    if(data.status==='success'){ showToast('✅ 採購 Sheets 初始化完成！'); loadProcurement(); }
+  }catch(e){showToast('⚠ 初始化失敗');}
+}
+
+async function loadProcurement(){
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'getPRList'})});
+    var data=await res.json();
+    if(data.status==='success') renderPRTable(data.data);
+  }catch(e){}
+
+  try{
+    var res2=await fetch(API,{method:'POST',body:JSON.stringify({action:'getChangeSetList'})});
+    var data2=await res2.json();
+    if(data2.status==='success') renderCSTable(data2.data);
+  }catch(e){}
+
+  try{
+    var res3=await fetch(API,{method:'POST',body:JSON.stringify({action:'getKPIList'})});
+    var data3=await res3.json();
+    if(data3.status==='success') renderKPITable(data3.data);
+  }catch(e){}
+}
+
+function renderPRTable(rows){
+  var tbody=document.getElementById('pr-table');
+  if(!rows||rows.length===0){tbody.innerHTML='<tr><td colspan="8" class="loading">尚無資料，請先初始化</td></tr>';return;}
+  tbody.innerHTML=rows.map(function(r){
+    var sc=r['狀態']==='已核准'?'var(--green)':r['狀態']==='待審核'?'var(--amber)':r['狀態']==='人工重審'?'var(--red)':'var(--ink2)';
+    return '<tr>'+
+      '<td style="font-family:var(--mono);font-size:11px">'+r['PR單號']+'</td>'+
+      '<td style="font-size:11px">'+r['料號']+'</td>'+
+      '<td style="font-size:11px">'+r['品名']+'</td>'+
+      '<td style="font-family:var(--mono)">'+r['數量']+' '+r['單位']+'</td>'+
+      '<td style="font-family:var(--mono)">NT$'+(r['目標單價']||0).toLocaleString()+'</td>'+
+      '<td style="font-size:11px">'+String(r['需求日期']).slice(0,10)+'</td>'+
+      '<td style="color:'+sc+';font-weight:600;font-size:12px">'+r['狀態']+'</td>'+
+      '<td><button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" onclick="generateAIRecommend(&quot;'+r['PR單號']+'&quot;)">AI 分析</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+async function generateAIRecommend(prNo){
+  showToast('🤖 AI 分析中（< 3分鐘）...');
+  var start=Date.now();
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'generatePRRecommend',prNo:prNo})});
+    var data=await res.json();
+    var elapsed=((Date.now()-start)/1000).toFixed(1);
+    if(data.status==='success'){
+      _currentCS=data;
+      renderCSDetail(data, elapsed);
+      showToast('✅ AI建議生成！自動寄送 RFQ 詢價信...');
+      // 自動寄 RFQ 詢價信
+      try{
+        var rfqRes=await fetch(API,{method:'POST',body:JSON.stringify({action:'sendRFQ',prNo:prNo,changeSetId:data.changeSetId})});
+        var rfqData=await rfqRes.json();
+        showToast(rfqData.status==='success'?'✅ AI建議完成！RFQ 已自動寄出':'✅ AI建議完成（Mail：'+rfqData.message+'）');
+      }catch(e2){ showToast('✅ AI建議完成（RFQ 寄送略過）'); }
+      loadProcurement();
+    } else { showToast('⚠ '+data.message); }
+  }catch(e){showToast('⚠ 分析失敗');}
+}
+
+function renderCSDetail(data, elapsed){
+  var wrap=document.getElementById('cs-detail');
+  var content=document.getElementById('cs-content');
+  var rec=data.recommendation;
+  var risk=data.risk;
+  var rc=function(r){return r==='高'?'var(--red)':r==='中'?'var(--amber)':'var(--green)';};
+
+  content.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">'+
+      '<div class="kpi" style="margin:0"><div class="kl">推薦供應商</div><div class="kv" style="font-size:16px;color:var(--blue)">'+rec.supplierName+'</div><div class="kn">Change Set: '+data.changeSetId+'</div></div>'+
+      '<div class="kpi" style="margin:0"><div class="kl">建議單價</div><div class="kv" style="color:var(--green)">NT$'+(rec.suggestedPrice||0).toLocaleString()+'</div><div class="kn">均價 NT$'+(rec.avgHistPrice||0).toLocaleString()+' 節省 '+rec.savingPct+'%</div></div>'+
+      '<div class="kpi" style="margin:0"><div class="kl">生成時間</div><div class="kv" style="color:var(--green)">'+elapsed+'s</div><div class="kn">< 3分鐘 ✅</div></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:10px;margin-bottom:10px">'+
+      '<span style="background:var(--bg);padding:4px 10px;border-radius:6px;font-size:12px">交期風險：<strong style="color:'+rc(risk.delivery)+'">'+risk.delivery+'</strong></span>'+
+      '<span style="background:var(--bg);padding:4px 10px;border-radius:6px;font-size:12px">品質風險：<strong style="color:'+rc(risk.quality)+'">'+risk.quality+'</strong></span>'+
+      '<span style="background:var(--bg);padding:4px 10px;border-radius:6px;font-size:12px">價格風險：<strong style="color:'+rc(risk.price)+'">'+risk.price+'</strong></span>'+
+      '<span style="background:var(--bg);padding:4px 10px;border-radius:6px;font-size:12px">預計交期：<strong>'+rec.leadTime+'天</strong></span>'+
+      '<span style="background:'+(rec.withinBudget?'#dcfce7':'#fee2e2')+';padding:4px 10px;border-radius:6px;font-size:12px">'+
+        (rec.withinBudget?'✅ 在預算內':'⚠ 超預算')+'</span>'+
+    '</div>'+
+    '<div style="font-size:11px;color:var(--ink2);background:var(--bg);padding:10px;border-radius:6px">📋 '+data.reasoning+'</div>';
+
+  var csId2=data.changeSetId;
+  document.getElementById('cs-actions').innerHTML=
+    '<button class="btn btn-primary" onclick="adoptChangeSet(this.dataset.id,true)" data-id="'+csId2+'">全部採納</button>'+
+    '<button class="btn btn-ghost" onclick="adoptChangeSet(this.dataset.id,false)" data-id="'+csId2+'">部分採納（供應商+交期）</button>'+
+    '<button class="btn btn-ghost" style="color:var(--red)" onclick="rejectChangeSet(this.dataset.id)" data-id="'+csId2+'">拒絕</button>';
+
+  wrap.style.display='block';
+}
+
+async function adoptChangeSet(csId, full){
+  var fields=full?['supplierId','suggestedPrice','leadTime','currency']:['supplierId','leadTime'];
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'applyChangeSet',changeSetId:csId,reviewedBy:user.account||'admin',acceptedFields:fields,rejected:false})});
+    var data=await res.json();
+    if(data.status==='success'){
+      showToast('✅ Change Set '+(full?'全部':'部分')+'採納！寄送審核通知中...');
+      // 自動寄審核結果通知信
+      try{
+        await fetch(API,{method:'POST',body:JSON.stringify({action:'sendCSResult',changeSetId:csId,result:data.result,reviewedBy:user.account||'admin'})});
+        showToast('✅ 採納完成！審核通知已寄出');
+      }catch(e2){}
+      document.getElementById('cs-detail').style.display='none';
+      loadProcurement();
+    }
+  }catch(e){showToast('⚠ 採納失敗');}
+}
+
+async function rejectChangeSet(csId){
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'applyChangeSet',changeSetId:csId,reviewedBy:user.account||'admin',acceptedFields:[],rejected:true})});
+    var data=await res.json();
+    if(data.status==='success'){
+      // 自動寄拒絕通知信
+      try{
+        await fetch(API,{method:'POST',body:JSON.stringify({action:'sendCSResult',changeSetId:csId,result:'已拒絕',reviewedBy:user.account||'admin'})});
+      }catch(e2){}
+      showToast('已拒絕，PR 回到人工重審。通知信已寄出');
+      document.getElementById('cs-detail').style.display='none';
+      loadProcurement();
+    }
+  }catch(e){showToast('⚠ 操作失敗');}
+}
+
+async function scanGmailReplies(){
+  showToast('📬 掃描 Gmail 供應商回信...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'scanReplies'})});
+    var data=await res.json();
+    if(data.status==='success'){
+      if(data.scanned>0){
+        showToast('✅ 發現 '+data.scanned+' 封供應商回信！已解析報價');
+      } else {
+        showToast('📬 尚無新供應商回信（'+data.note+')');
+      }
+    }
+  }catch(e){showToast('⚠ Gmail 掃描失敗');}
+}
+
+async function sendMonthlyKPI(){
+  showToast('📧 寄送 KPI 月報...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'sendKPIReport',period:'2026-04'})});
+    var data=await res.json();
+    if(data.status==='success') showToast('✅ KPI 月報已寄出！');
+    else showToast('⚠ 月報寄送失敗：'+data.message);
+  }catch(e){showToast('⚠ 月報寄送失敗');}
+}
+
+function renderCSTable(rows){
+  var tbody=document.getElementById('cs-table');
+  if(!rows||rows.length===0){tbody.innerHTML='<tr><td colspan="8" class="loading">尚無建議</td></tr>';return;}
+  tbody.innerHTML=rows.map(function(r){
+    var sc=r['狀態']==='已採納'?'var(--green)':r['狀態']==='已拒絕'?'var(--red)':r['狀態']==='待審核'?'var(--amber)':'var(--ink2)';
+    var riskColor=function(v){return v==='高'?'var(--red)':v==='中'?'var(--amber)':'var(--green)';};
+    return '<tr>'+
+      '<td style="font-family:var(--mono);font-size:10px">'+r['Change Set ID']+'</td>'+
+      '<td style="font-size:11px">'+r['PR單號']+'</td>'+
+      '<td style="font-size:11px">'+r['供應商名稱']+'</td>'+
+      '<td style="font-family:var(--mono)">NT$'+(r['建議單價']||0).toLocaleString()+'</td>'+
+      '<td style="color:var(--green);font-weight:600">'+r['節省比例']+'</td>'+
+      '<td style="font-family:var(--mono)">'+r['建議交期(天)']+'</td>'+
+      '<td style="font-size:10px"><span style="color:'+riskColor(r['交期風險'])+'">交'+r['交期風險']+'</span> <span style="color:'+riskColor(r['品質風險'])+'">品'+r['品質風險']+'</span></td>'+
+      '<td style="color:'+sc+';font-weight:600;font-size:12px">'+r['狀態']+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+async function genKPI(){
+  showToast('📊 計算本月 KPI...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'generateKPI',period:'2026-04'})});
+    var data=await res.json();
+    if(data.status==='success'){
+      var s=data.summary;
+      document.getElementById('kpi-summary').style.display='block';
+      document.getElementById('kpi-summary').innerHTML=
+        '✅ KPI 期間：'+data.period+' | '+
+        'Change Set 採納率：<strong style="color:var(--green)">'+s.adoptionRate+'</strong> | '+
+        '供應商家數：'+s.suppliersKPI+' 家 | '+
+        '模擬上鏈：✅（第三階段改為 Blockchain API）| '+
+        '產出時間：'+data.generationTime+'秒';
+      loadKPITable();
+      showToast('✅ KPI 計算完成！');
+    }
+  }catch(e){showToast('⚠ KPI 計算失敗');}
+}
+
+async function loadKPITable(){
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'getKPIList'})});
+    var data=await res.json();
+    if(data.status==='success') renderKPITable(data.data);
+  }catch(e){}
+}
+
+function renderKPITable(rows){
+  var tbody=document.getElementById('kpi-table');
+  if(!rows||rows.length===0){tbody.innerHTML='<tr><td colspan="8" class="loading">待計算</td></tr>';return;}
+  tbody.innerHTML=rows.map(function(r){
+    var score=parseFloat(r['綜合KPI分數'])||0;
+    var sc=score>=90?'var(--green)':score>=75?'var(--amber)':'var(--red)';
+    return '<tr>'+
+      '<td style="font-size:11px">'+r['KPI期間']+'</td>'+
+      '<td style="font-size:11px">'+r['供應商名稱']+'</td>'+
+      '<td style="font-family:var(--mono)">'+r['價格達成率(%)']+'%</td>'+
+      '<td style="font-family:var(--mono)">'+r['交期達成率(%)']+'%</td>'+
+      '<td style="font-family:var(--mono)">'+r['品質合格率(%)']+'%</td>'+
+      '<td style="font-family:var(--mono)">'+r['AI採納率(%)']+'%</td>'+
+      '<td style="color:'+sc+';font-weight:600;font-size:13px">'+score+'分</td>'+
+      '<td><span style="font-size:10px;background:#ede9fe;color:#5b21b6;padding:2px 6px;border-radius:4px">'+r['上鏈狀態']+'</span></td>'+
+    '</tr>';
+  }).join('');
+}
+
+async function runReflect(){
+  showToast('🔁 Reflect 閉環學習中...');
+  try{
+    var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'reflectLearning'})});
+    var data=await res.json();
+    if(data.status==='success'){
+      var insights=data.learning.insights;
+      showToast('✅ '+insights[0]);
+    }
+  }catch(e){showToast('⚠ 閉環學習失敗');}
+}
+
+async function runClosedLoopTest(){
+  showToast('🔄 執行完整閉環測試（請至 Apps Script 查看 Log）...');
+  // 依序執行五個步驟
+  await initProcurement();
+  await new Promise(function(r){setTimeout(r,1000);});
+  var prs=['PR20260001','PR20260002','PR20260003'];
+  for(var i=0;i<prs.length;i++){
+    await generateAIRecommend(prs[i]);
+    await new Promise(function(r){setTimeout(r,500);});
+  }
+  showToast('✅ 閉環測試完成！請查看各區塊結果');
 }
 
 // ── 內容行銷 ──
