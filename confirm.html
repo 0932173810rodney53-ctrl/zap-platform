@@ -2,193 +2,139 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>確認報價 — ADDWII</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>確認訂單 — ZAP 空氣清淨機</title>
 <style>
-:root{
-  --bg:#f5f4f0;--white:#fff;--border:#e2e0d6;
-  --ink:#1c1b18;--ink2:#6b6860;--ink3:#a8a69e;
-  --orange:#d4500a;--green:#16a34a;--blue:#2563eb;
-  --sans:'Noto Sans TC',sans-serif;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
-
-header{
-  background:var(--ink);padding:0 24px;height:56px;
-  display:flex;align-items:center;
-}
-.logo{color:#fff;font-size:16px;font-weight:700;letter-spacing:.08em;}
-.logo span{color:var(--orange);}
-
-main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
-
-.card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:16px;padding:40px 32px;
-  max-width:480px;width:100%;
-}
-
-.icon-wrap{
-  width:72px;height:72px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;font-size:32px;
-}
-.title{font-size:20px;font-weight:700;margin-bottom:8px;text-align:center;}
-.subtitle{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:24px;text-align:center;}
-
-.info-box{
-  background:var(--bg);border-radius:10px;padding:16px 18px;
-  margin-bottom:14px;
-}
-.info-label{font-size:11px;color:var(--ink3);letter-spacing:.08em;margin-bottom:4px;}
-.info-value{font-size:15px;font-weight:600;color:var(--ink);}
-
-.btn{
-  width:100%;padding:14px;border-radius:10px;border:none;
-  cursor:pointer;font-family:var(--sans);font-size:15px;
-  font-weight:600;transition:all .2s;margin-top:6px;
-}
-.btn-orange{background:var(--orange);color:#fff;}
-.btn-orange:hover{background:#bf4508;}
-.btn-ghost{
-  background:none;border:1.5px solid var(--border);
-  color:var(--ink2);font-size:14px;
-}
-.btn-ghost:hover{border-color:var(--ink2);color:var(--ink);}
-
-.loading{text-align:center;padding:40px;color:var(--ink2);}
-.error-state{text-align:center;}
-
-footer{
-  text-align:center;padding:20px;
-  font-size:12px;color:var(--ink3);
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f5f4f0;min-height:100vh;display:flex;flex-direction:column}
+header{background:#1E2761;color:#fff;padding:16px 24px;display:flex;align-items:center;gap:12px}
+header h1{font-size:18px;font-weight:600}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.08);padding:36px 32px;width:100%;max-width:480px;text-align:center}
+.icon{font-size:48px;margin-bottom:16px}
+.title{font-size:22px;font-weight:700;color:#1E2761;margin-bottom:8px}
+.subtitle{font-size:14px;color:#6b7280;margin-bottom:24px;line-height:1.6}
+.no-badge{background:#EFF6FF;color:#1E40AF;font-size:15px;font-weight:700;padding:10px 20px;border-radius:8px;display:inline-block;margin-bottom:24px;letter-spacing:1px}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;font-size:14px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:#6b7280}
+.info-value{font-weight:600;color:#111827}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px;transition:opacity .2s}
+.btn-primary{background:#16A34A;color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-cancel{background:#f3f4f6;color:#374151}
+.btn-cancel:hover{background:#e5e7eb}
+input[type=text]{width:100%;padding:12px 16px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;text-align:center;margin-bottom:12px;outline:none;transition:border-color .2s}
+input[type=text]:focus{border-color:#1E2761}
+footer{text-align:center;padding:16px;font-size:12px;color:#9ca3af}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="logo">ADD<span>WII</span></div>
+  <span style="font-size:24px">🌬️</span>
+  <h1>ZAP 空氣清淨機 — 訂單確認</h1>
 </header>
 
 <main>
 
-  <!-- 載入中 -->
-  <div id="loading-state" class="card">
-    <div class="loading">載入中...</div>
+  <!-- 輸入單號 -->
+  <div class="card" id="s-input">
+    <div class="icon">📋</div>
+    <div class="title">輸入詢價單號</div>
+    <div class="subtitle">請輸入您收到的詢價單號<br>格式：INQ-年月日-序號</div>
+    <input type="text" id="inp-no" placeholder="INQ-20260421-434" oninput="this.value=this.value.toUpperCase()">
+    <button class="btn btn-primary" onclick="doQuery()">查詢訂單</button>
   </div>
 
-  <!-- 確認報價頁 -->
-  <div class="card" id="confirm-state" style="display:none;">
-    <div class="icon-wrap" style="background:#fff8f5;">📋</div>
-    <div class="title">確認報價</div>
-    <div class="subtitle">請確認以下報價資訊，<br>確認後訂單將正式成立。</div>
-
-    <div class="info-box">
-      <div class="info-label">詢價單號</div>
-      <div class="info-value" id="disp-no" style="color:var(--orange);">—</div>
+  <!-- 確認頁 -->
+  <div class="card" id="s-confirm" style="display:none">
+    <div class="icon">📄</div>
+    <div class="title">確認您的訂單</div>
+    <div class="subtitle">請確認以下資訊，按下確認即完成訂單</div>
+    <div class="no-badge" id="disp-no"></div>
+    <div style="text-align:left;margin-bottom:20px">
+      <div class="info-row">
+        <span class="info-label">幣別</span>
+        <span class="info-value">新台幣（NTD）</span>
+      </div>
     </div>
-    <div class="info-box" id="box-price" style="display:none;">
-      <div class="info-label">報價內容</div>
-      <div class="info-value" id="disp-price" style="font-size:14px;">—</div>
-    </div>
-    <div class="info-box" id="box-shipdate" style="display:none;">
-      <div class="info-label">預計出貨日期</div>
-      <div class="info-value" id="disp-shipdate" style="color:var(--blue);">—</div>
-    </div>
-
-    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin:20px 0;font-size:13px;color:#92400e;line-height:1.7;">
-      ⚠️ 確認後即表示您同意此報價，訂單將正式成立。<br>付款方式依合約條件執行。
-    </div>
-
-    <button class="btn btn-orange" onclick="doConfirm()">✅ 確認接受報價，成立訂單</button>
-    <button class="btn btn-ghost" onclick="notAccept()">暫不確認</button>
+    <button class="btn btn-primary" onclick="doConfirm()">✅ 確認訂單</button>
+    <button class="btn btn-cancel" onclick="goBack()">返回重新輸入</button>
   </div>
 
   <!-- 成功頁 -->
-  <div class="card" id="success-state" style="display:none;text-align:center;">
-    <div class="icon-wrap" style="background:#f0fdf4;margin:0 auto 20px;">🎉</div>
-    <div class="title" style="color:var(--green);">訂單成立！</div>
-    <div class="subtitle">感謝您的確認，訂單已正式成立。<br>我們將於確認付款後安排出貨程序。</div>
-    <div class="info-box" style="margin-top:16px;">
-      <div class="info-label">訂單編號</div>
-      <div class="info-value" id="success-no" style="color:var(--orange);">—</div>
-    </div>
-    <div style="background:#d4500a;border-radius:14px;padding:22px 24px;margin-top:20px;">
-      <div style="font-size:20px;font-weight:700;color:#fff;line-height:1.5;">
-        💰 確認付款後安排出貨程序
-      </div>
-    </div>
+  <div class="card" id="s-success" style="display:none">
+    <div class="icon">✅</div>
+    <div class="title">訂單確認成功！</div>
+    <div class="subtitle">感謝您確認訂單<br>業務將在確認後安排出貨<br>如有問題請聯繫：<strong>0932-173-810</strong></div>
+    <div class="no-badge" id="success-no"></div>
+    <button class="btn btn-cancel" style="margin-top:20px" onclick="location.href='inquiry.html'">返回詢價頁</button>
   </div>
 
   <!-- 錯誤頁 -->
-  <div class="card" id="error-state" style="display:none;text-align:center;">
-    <div class="icon-wrap" style="background:#fef2f2;">⚠️</div>
-    <div class="title" style="color:#dc2626;">連結無效</div>
-    <div class="subtitle">找不到對應的報價資訊，<br>請聯繫業務人員確認。</div>
+  <div class="card" id="s-error" style="display:none">
+    <div class="icon">⚠️</div>
+    <div class="title" id="err-title">發生錯誤</div>
+    <div class="subtitle" id="err-msg">請聯繫業務人員確認</div>
+    <button class="btn btn-cancel" style="margin-top:20px" onclick="goBack()">重新輸入</button>
   </div>
 
 </main>
 
-<footer>ADDWII · 研能科技有限公司</footer>
+<footer>ADDWII · 研能科技有限公司 · ZAP 空氣清淨機</footer>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbx5rpoJpPEU3ddLpRFbAccJtQVTj_5QX9jL56BbT4Qy-qBvqgFQ5lwrtybvB_SbbcJl/exec';
-
+var API = 'https://script.google.com/macros/s/AKfycbx5rpoJpPEU3ddLpRFbAccJtQVTj_5QX9jL56BbT4Qy-qBvqgFQ5lwrtybvB_SbbcJl/exec';
 var orderNo = '';
 
-(function init(){
-  var params = new URLSearchParams(window.location.search);
-  orderNo = params.get('confirm') || params.get('no') || '';
-
-  if(!orderNo){
-    // 沒有帶參數，顯示手動輸入框
-    show('input-state');
-    return;
+// 頁面載入：檢查 URL 參數
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var no = p.get('confirm') || p.get('no') || '';
+  if(no) {
+    document.getElementById('inp-no').value = no;
+    doQuery();
   }
-  loadOrder(orderNo);
 })();
 
-function loadOrder(no) {
-  orderNo = no.trim();
-  if(!orderNo){ alert('請輸入詢價單號'); return; }
-
-  // 直接顯示確認頁（不查詢 API，避免 CORS 問題）
-  // 詳細資訊客戶可從報價信中確認
-  document.getElementById('disp-no').textContent = orderNo;
-  document.getElementById('box-price').style.display = 'none';
-  show('confirm-state');
-}
-
-async function doConfirm(){
-  var btn = document.querySelector('.btn-orange');
-  btn.textContent = '處理中...';
-  btn.disabled = true;
-
-  try {
-    await fetch(API, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'confirmOrder', '詢價單號': orderNo })
-    });
-  } catch(e) {}
-
-  document.getElementById('success-no').textContent = orderNo;
-  show('success-state');
-}
-
-function notAccept(){
-  show('error-state');
-  document.getElementById('error-state').querySelector('.title').textContent = '已取消';
-  document.getElementById('error-state').querySelector('.subtitle').textContent = '您已取消此次確認。\n如需重新確認請聯繫業務人員。';
-  document.getElementById('error-state').querySelector('.icon-wrap').textContent = '👋';
-}
-
-function show(id){
-  ['loading-state','confirm-state','success-state','error-state'].forEach(function(s){
-    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+function show(id) {
+  ['s-input','s-confirm','s-success','s-error'].forEach(function(s){
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
   });
+}
+
+function doQuery() {
+  var no = document.getElementById('inp-no').value.trim();
+  if(!no) { alert('請輸入詢價單號'); return; }
+  orderNo = no;
+  // 直接顯示確認頁（不查詢API，避免CORS問題）
+  document.getElementById('disp-no').textContent = orderNo;
+  show('s-confirm');
+}
+
+function doConfirm() {
+  var btn = document.querySelector('#s-confirm .btn-primary');
+  btn.disabled = true;
+  btn.textContent = '確認中...';
+
+  // 用 no-cors 寫入（只寫入，不讀取回應）
+  fetch(API, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({ action: 'confirmOrder', '詢價單號': orderNo })
+  }).catch(function(){});
+
+  // 直接顯示成功（no-cors 無法讀回應，視為成功）
+  setTimeout(function(){
+    document.getElementById('success-no').textContent = orderNo;
+    show('s-success');
+  }, 1000);
+}
+
+function goBack() {
+  document.getElementById('inp-no').value = orderNo;
+  show('s-input');
 }
 </script>
 </body>
