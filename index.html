@@ -1008,8 +1008,9 @@ function renderPRTable(rows){
       '<td style="font-size:11px;text-align:right">' + (r['數量']||'') + '</td>' +
       '<td style="font-size:11px;text-align:right">NT$' + ((r['目標單價']||0)*1).toLocaleString() + '</td>' +
       '<td style="color:' + sc + ';font-weight:600;font-size:12px">' + (r['狀態']||'') + '</td>' +
-      '<td><button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" ' +
-        'onclick="generateAIRecommend(\'' + prNo + '\')" >AI 分析</button></td>' +
+      (r['狀態']==='已採納'||r['狀態']==='部分採納'?
+        '<td style="text-align:center"><span style="font-size:11px;color:var(--green);font-weight:600">✅ 完成</span></td>':
+        '<td><button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" onclick="generateAIRecommend(\'' + prNo + '\')" >AI 分析</button></td>') +
       '</tr>';
   }).join('');
 }
@@ -1058,10 +1059,13 @@ function renderCSDetail(data, elapsed){
     '<div style="font-size:11px;color:var(--ink2);background:var(--bg);padding:10px;border-radius:6px">📋 '+data.reasoning+'</div>';
 
   var csId2=data.changeSetId;
-  document.getElementById('cs-actions').innerHTML=
-    '<button class="btn btn-primary" onclick="adoptChangeSet(this.dataset.id,true)" data-id="'+csId2+'">全部採納</button>'+
-    '<button class="btn btn-ghost" onclick="adoptChangeSet(this.dataset.id,false)" data-id="'+csId2+'">部分採納（供應商+交期）</button>'+
-    '<button class="btn btn-ghost" style="color:var(--red)" onclick="rejectChangeSet(this.dataset.id)" data-id="'+csId2+'">拒絕</button>';
+  var csStatusNow = data.csStatus || '';
+  var isLocked = (csStatusNow==='已核准'||csStatusNow==='已採納'||csStatusNow==='已拒絕');
+  document.getElementById('cs-actions').innerHTML = isLocked
+    ? '<div style="text-align:center;padding:12px;background:#F0FDF4;border-radius:6px;font-weight:700;color:#16A34A;font-size:13px">✅ 此 ChangeSet 已'+csStatusNow+'，操作已鎖定</div>'
+    : '<button class="btn btn-primary" onclick="adoptChangeSet(this.dataset.id,true)" data-id="'+csId2+'">✅ 全部採納</button>'+
+      '<button class="btn btn-ghost" onclick="adoptChangeSet(this.dataset.id,false)" data-id="'+csId2+'">⚠️ 部分採納（供應商+交期）</button>'+
+      '<button class="btn btn-ghost" style="color:var(--red)" onclick="rejectChangeSet(this.dataset.id)" data-id="'+csId2+'">❌ 拒絕</button>';
 
   wrap.style.display='block';
 }
@@ -1071,9 +1075,15 @@ async function adoptChangeSet(csId, full){
   try{
     var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'applyChangeSet',changeSetId:csId,reviewedBy:user.account||'admin',acceptedFields:fields,rejected:false})});
     var data=await res.json();
+    // 後端鎖定：已核准/已採納/已拒絕不允許重複操作
+    if(data.status==='locked'){
+      showToast('⚠ 此 ChangeSet 已'+data.csStatus+'，不可重複操作');
+      document.getElementById('cs-detail').style.display='none';
+      loadProcurement();
+      return;
+    }
     if(data.status==='success'){
       showToast('✅ Change Set '+(full?'全部':'部分')+'採納！寄送審核通知中...');
-      // 自動寄審核結果通知信
       try{
         await fetch(API,{method:'POST',body:JSON.stringify({action:'sendCSResult',changeSetId:csId,result:data.result,reviewedBy:user.account||'admin'})});
         showToast('✅ 採納完成！審核通知已寄出');
@@ -1088,8 +1098,14 @@ async function rejectChangeSet(csId){
   try{
     var res=await fetch(API,{method:'POST',body:JSON.stringify({action:'applyChangeSet',changeSetId:csId,reviewedBy:user.account||'admin',acceptedFields:[],rejected:true})});
     var data=await res.json();
+    // 後端鎖定：已核准/已採納/已拒絕不允許重複操作
+    if(data.status==='locked'){
+      showToast('⚠ 此 ChangeSet 已'+data.csStatus+'，不可重複操作');
+      document.getElementById('cs-detail').style.display='none';
+      loadProcurement();
+      return;
+    }
     if(data.status==='success'){
-      // 自動寄拒絕通知信
       try{
         await fetch(API,{method:'POST',body:JSON.stringify({action:'sendCSResult',changeSetId:csId,result:'已拒絕',reviewedBy:user.account||'admin'})});
       }catch(e2){}
