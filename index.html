@@ -996,17 +996,21 @@ function renderPRTable(rows){
   var tbody=document.getElementById('pr-table');
   if(!rows||rows.length===0){tbody.innerHTML='<tr><td colspan="8" class="loading">尚無資料，請先初始化</td></tr>';return;}
   tbody.innerHTML=rows.map(function(r){
-    var sc=r['狀態']==='已核准'?'var(--green)':r['狀態']==='待審核'?'var(--amber)':r['狀態']==='人工重審'?'var(--red)':'var(--ink2)';
-    return '<tr>'+
-      '<td style="font-family:var(--mono);font-size:11px">'+r['PR單號']+'</td>'+
-      '<td style="font-size:11px">'+r['料號']+'</td>'+
-      '<td style="font-size:11px">'+r['品名']+'</td>'+
-      '<td style="font-family:var(--mono)">'+r['數量']+' '+r['單位']+'</td>'+
-      '<td style="font-family:var(--mono)">NT$'+(r['目標單價']||0).toLocaleString()+'</td>'+
-      '<td style="font-size:11px">'+String(r['需求日期']).slice(0,10)+'</td>'+
-      '<td style="color:'+sc+';font-weight:600;font-size:12px">'+r['狀態']+'</td>'+
-      '<td><button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" onclick="generateAIRecommend(&quot;'+r['PR單號']+'&quot;)">AI 分析</button></td>'+
-    '</tr>';
+    var sc = r['狀態']==='已核准'?'var(--green)':
+             r['狀態']==='待審核'?'var(--amber)':
+             r['狀態']==='人工重審'?'var(--red)':'var(--ink2)';
+    var prNo = r['PR單號']||'';
+    return '<tr>' +
+      '<td style="font-family:var(--mono);font-size:11px">' + prNo + '</td>' +
+      '<td style="font-size:11px">' + (r['建立時間']||'') + '</td>' +
+      '<td style="font-size:11px">' + (r['申請人']||'') + '</td>' +
+      '<td style="font-size:11px">' + (r['品名']||'') + '</td>' +
+      '<td style="font-size:11px;text-align:right">' + (r['數量']||'') + '</td>' +
+      '<td style="font-size:11px;text-align:right">NT$' + ((r['目標單價']||0)*1).toLocaleString() + '</td>' +
+      '<td style="color:' + sc + ';font-weight:600;font-size:12px">' + (r['狀態']||'') + '</td>' +
+      '<td><button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" ' +
+        'onclick="generateAIRecommend(\'' + prNo + '\')" >AI 分析</button></td>' +
+      '</tr>';
   }).join('');
 }
 
@@ -1020,16 +1024,14 @@ async function generateAIRecommend(prNo){
     if(data.status==='success'){
       _currentCS=data;
       renderCSDetail(data, elapsed);
-      showToast('✅ AI建議生成！自動寄送 RFQ 詢價信...');
-      // 自動寄 RFQ 詢價信
-      try{
-        var rfqRes=await fetch(API,{method:'POST',body:JSON.stringify({action:'sendRFQ',prNo:prNo,changeSetId:data.changeSetId})});
-        var rfqData=await rfqRes.json();
-        showToast(rfqData.status==='success'?'✅ AI建議完成！RFQ 已自動寄出':'✅ AI建議完成（Mail：'+rfqData.message+'）');
-      }catch(e2){ showToast('✅ AI建議完成（RFQ 寄送略過）'); }
+      showToast('✅ AI建議生成！（'+elapsed+'秒）');
       loadProcurement();
-    } else { showToast('⚠ '+data.message); }
-  }catch(e){showToast('⚠ 分析失敗');}
+    } else {
+      showToast('⚠ '+data.message);
+    }
+  }catch(e){
+    showToast('⚠ 分析失敗：'+e.message);
+  }
 }
 
 function renderCSDetail(data, elapsed){
