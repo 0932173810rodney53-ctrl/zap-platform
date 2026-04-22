@@ -240,18 +240,19 @@ tbody td:first-child{color:var(--ink);font-weight:500;font-family:var(--mono);fo
         <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:var(--ink)">📦 入庫登記</div>
         <div class="fg"><label class="fl">料號</label>
           <select id="ib-material" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px">
-            <option value="M001">M001 - HEPA H13 濾網（ZAP-400用）</option>
-            <option value="M002">M002 - HEPA H14 濾網（ZAP-1200用）</option>
-            <option value="M003">M003 - 活性碳濾網</option>
-            <option value="M004">M004 - 前置預濾網</option>
-            <option value="M005">M005 - 馬達元件</option>
+            <option value="ZAP-200">ZAP-200（10坪）</option>
+            <option value="ZAP-400">ZAP-400（20坪）</option>
+            <option value="ZAP-600">ZAP-600（30坪）</option>
+            <option value="ZAP-800">ZAP-800（40坪）</option>
+            <option value="ZAP-1200">ZAP-1200（60坪）</option>
+            <option value="ZAP-1600">ZAP-1600（80坪）</option>
           </select></div>
         <div class="fg"><label class="fl">入庫數量</label>
           <input type="number" id="ib-qty" min="1" value="10" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px"></div>
         <div class="fg"><label class="fl">供應商名稱</label>
           <input type="text" id="ib-supplier" value="國際空氣科學" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px"></div>
         <div style="display:flex;gap:8px;margin-top:16px">
-          <button class="btn btn-primary" style="flex:1" onclick="submitInbound()">確認入庫</button>
+          <button class="btn btn-primary" style="flex:1" onclick="this.disabled=true;this.textContent='入庫中...';submitInbound().finally(()=>{this.disabled=false;this.textContent='確認入庫'})">確認入庫</button>
           <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('inbound-modal').style.display='none'">取消</button>
         </div>
       </div>
