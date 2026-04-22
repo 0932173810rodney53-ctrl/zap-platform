@@ -976,55 +976,65 @@ async function loadProcurement(){
   var tbody=document.getElementById('pr-table-body');
   if(!tbody) return;
   tbody.innerHTML='<tr><td colspan="8" class="loading">載入中...</td></tr>';
+  
   try{
-    // 同時查 PR 列表和 CS 列表
-    var [prRes, csRes] = await Promise.all([
-      fetch(API,{method:'POST',body:JSON.stringify({action:'getPRList'})}),
-      fetch(API,{method:'POST',body:JSON.stringify({action:'getChangeSetList'})})
-    ]);
+    // Step 1：先查 PR 列表（主要資料）
+    var prRes = await fetch(API,{method:'POST',body:JSON.stringify({action:'getPRList'})});
     var prData = await prRes.json();
-    var csData = await csRes.json();
-
-    // 建立 prNo → CS 狀態 Map（取最新一筆）
-    var csStatusMap = {};
-    var csIdMap = {};
-    if(csData.status==='success' && csData.data){
-      csData.data.forEach(function(c){
-        var prNo = String(c['PR單號']||'').trim();
-        csStatusMap[prNo] = String(c['狀態']||'').trim();
-        csIdMap[prNo] = String(c['ChangeSet ID']||'').trim();
-      });
-    }
-    window._csStatusMap = csStatusMap;
-    window._csIdMap = csIdMap;
-
-    var rows = prData.data||prData.list||[];
+    var rows = (prData.data)||[];
+    
     if(!rows||rows.length===0){
-      tbody.innerHTML='<tr><td colspan="8" class="loading">尚無資料，請先初始化</td></tr>';
+      tbody.innerHTML='<tr><td colspan="8" class="loading">尚無採購PR資料</td></tr>';
       return;
     }
+
+    // Step 2：嘗試查 CS 列表（選用，失敗不影響主要顯示）
+    var csStatusMap={}, csIdMap={};
+    try{
+      var csRes = await fetch(API,{method:'POST',body:JSON.stringify({action:'getChangeSetList'})});
+      var csData = await csRes.json();
+      if(csData.status==='success' && csData.data){
+        csData.data.forEach(function(c){
+          var prNo = String(c['PR單號']||'').trim();
+          if(prNo){
+            csStatusMap[prNo] = String(c['狀態']||'').trim();
+            csIdMap[prNo]     = String(c['ChangeSet ID']||'').trim();
+          }
+        });
+      }
+    }catch(e2){ console.log('CS列表查詢失敗（不影響PR顯示）：', e2.message); }
+    
+    window._csStatusMap = csStatusMap;
+    window._csIdMap     = csIdMap;
+
+    // Step 3：渲染 PR 列表
     tbody.innerHTML = rows.map(function(r){
       var prNo = String(r['PR單號']||'').trim();
-      var st = String(r['狀態']||'').trim();
-      var sc = st==='已核准'?'var(--green)':st==='待審核'?'var(--amber)':st==='人工重審'?'var(--red)':'var(--ink2)';
-      var csStatus = csStatusMap[prNo]||'';
-      var isLocked = (csStatus==='已核准'||csStatus==='已採納'||csStatus==='已拒絕');
+      var st   = String(r['狀態']||'').trim();
+      var sc   = st==='已核准'?'var(--green)':
+                 st==='待審核'?'var(--amber)':
+                 st==='人工重審'?'var(--red)':'var(--ink2)';
+      var csStatus  = csStatusMap[prNo]||'';
+      var isLocked  = (csStatus==='已核准'||csStatus==='已採納'||csStatus==='已拒絕');
       var btn = isLocked
         ? '<span style="font-size:11px;color:var(--green);font-weight:700">✅ '+csStatus+'</span>'
-        : '<button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" onclick="generateAIRecommend(\'' + prNo + '\')">AI 分析</button>';
-      return '<tr>'+
-        '<td style="font-family:var(--mono);font-size:11px">'+prNo+'</td>'+
-        '<td style="font-size:11px">'+(r['建立時間']||'')+'</td>'+
-        '<td style="font-size:11px">'+(r['申請人']||'')+'</td>'+
-        '<td style="font-size:11px">'+(r['品名']||'')+'</td>'+
-        '<td style="font-size:11px;text-align:right">'+(r['數量']||'')+'</td>'+
-        '<td style="font-size:11px;text-align:right">NT$'+((Number(r['目標單價'])||0).toLocaleString())+'</td>'+
-        '<td style="color:'+sc+';font-weight:600;font-size:12px">'+st+'</td>'+
-        '<td>'+btn+'</td>'+
-        '</tr>';
+        : '<button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" '
+          + 'onclick="generateAIRecommend(\'' + prNo + '\')">AI 分析</button>';
+      return '<tr>'
+        + '<td style="font-family:var(--mono);font-size:11px">'+(prNo||'')+'</td>'
+        + '<td style="font-size:11px">'+(r['建立時間']||'')+'</td>'
+        + '<td style="font-size:11px">'+(r['申請人']||'')+'</td>'
+        + '<td style="font-size:11px">'+(r['品名']||'')+'</td>'
+        + '<td style="font-size:11px;text-align:right">'+(r['數量']||'')+'</td>'
+        + '<td style="font-size:11px;text-align:right">NT$'+((Number(r['目標單價'])||0).toLocaleString())+'</td>'
+        + '<td style="color:'+sc+';font-weight:600;font-size:12px">'+st+'</td>'
+        + '<td>'+btn+'</td>'
+        + '</tr>';
     }).join('');
+
   }catch(e){
     tbody.innerHTML='<tr><td colspan="8" class="loading">載入失敗：'+e.message+'</td></tr>';
+    console.error('loadProcurement 錯誤：', e);
   }
 }
 
