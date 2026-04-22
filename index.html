@@ -1023,6 +1023,15 @@ async function generateAIRecommend(prNo){
     var data=await res.json();
     var elapsed=((Date.now()-start)/1000).toFixed(1);
     if(data.status==='success'){
+      // 直接從 AI採購建議列表查這個 CS 的最新狀態（最可靠）
+      try{
+        var csListRes=await fetch(API,{method:'POST',body:JSON.stringify({action:'getChangeSetList'})});
+        var csListData=await csListRes.json();
+        if(csListData.status==='success' && csListData.data){
+          var csMatch=csListData.data.find(function(c){ return String(c['ChangeSet ID'])===String(data.changeSetId); });
+          if(csMatch) data.csStatus=String(csMatch['狀態']||'');
+        }
+      }catch(e2){}
       _currentCS=data;
       renderCSDetail(data, elapsed);
       showToast('✅ AI建議生成！（'+elapsed+'秒）');
