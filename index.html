@@ -1026,7 +1026,7 @@ async function loadProcurement(){
         + '<td style="font-size:11px">'+(r['申請人']||'')+'</td>'
         + '<td style="font-size:11px">'+(r['品名']||'')+'</td>'
         + '<td style="font-size:11px;text-align:right">'+(r['數量']||'')+'</td>'
-        + '<td style="font-size:11px;text-align:right">NT$'+((Number(r['目標單價'])||0).toLocaleString())+'</td>'
+        + '<td style="font-size:11px;text-align:right">NT$'+(isNaN(Number(r['目標單價']))?'-':Number(r['目標單價']).toLocaleString())+'</td>'
         + '<td style="color:'+sc+';font-weight:600;font-size:12px">'+st+'</td>'
         + '<td>'+btn+'</td>'
         + '</tr>';
